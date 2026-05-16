@@ -55,107 +55,80 @@ impl Render for HelloWorld {
                     toggle_action(&gpui::ClickEvent::default(), window, cx);
                 }
             }))
-            .child(
+           .child(
                 div()
                     .flex()
                     .flex_col()
                     .flex_1()
-                    .h_full()
+                    .gap_3()
                     .bg(rgb(0x505050))
-                    // titlebar strip for main content — draggable, shows toggle when sidebar is hidden
-                    .child(
-                        div()
-                            .h(px(52.0))
-                            .w_full()
-                            .flex()
-                            .items_end()
-                            .pb_2()
-                            .when(self.sidebar_hidden, |el| {
-                                el.pl(px(76.0)).child(
-                                    gpui_component::button::Button::new("Show Sidebar").on_click({
-                                        let toggle_action = toggle_action.clone();
-                                        move |_, window, cx| {
-                                            toggle_action(&gpui::ClickEvent::default(), window, cx);
-                                        }
-                                    }),
-                                )
-                            })
-                            .on_mouse_move(|_, window, _| {
-                                window.start_window_move();
-                            }),
-                    )
+                    .h_full()
+                    .justify_center()
+                    .items_center()
+                    .shadow_lg()
+                    .border_1()
+                    .border_color(rgb(0x0000ff))
+                    .text_xl()
+                    .text_color(rgb(0xffffff))
+                    .child(format!("Hello, {}!", &self.text))
                     .child(
                         div()
                             .flex()
-                            .flex_col()
-                            .flex_1()
-                            .gap_3()
-                            .justify_center()
-                            .items_center()
-                            .shadow_lg()
-                            .border_1()
-                            .border_color(rgb(0x0000ff))
-                            .text_xl()
-                            .text_color(rgb(0xffffff))
-                            .child(format!("Hello, {}!", &self.text))
+                            .gap_2()
                             .child(
                                 div()
-                                    .flex()
-                                    .gap_2()
-                                    .child(
-                                        div()
-                                            .size_8()
-                                            .bg(gpui::red())
-                                            .border_1()
-                                            .border_dashed()
-                                            .rounded_md()
-                                            .border_color(gpui::white()),
-                                    )
-                                    .child(
-                                        div()
-                                            .size_8()
-                                            .bg(gpui::green())
-                                            .border_1()
-                                            .border_dashed()
-                                            .rounded_md()
-                                            .border_color(gpui::white()),
-                                    )
-                                    .child(
-                                        div()
-                                            .size_8()
-                                            .bg(gpui::blue())
-                                            .border_1()
-                                            .border_dashed()
-                                            .rounded_md()
-                                            .border_color(gpui::white()),
-                                    )
-                                    .child(
-                                        div()
-                                            .size_8()
-                                            .bg(gpui::yellow())
-                                            .border_1()
-                                            .border_dashed()
-                                            .rounded_md()
-                                            .border_color(gpui::white()),
-                                    )
-                                    .child(
-                                        div()
-                                            .size_8()
-                                            .bg(gpui::black())
-                                            .border_1()
-                                            .border_dashed()
-                                            .rounded_md()
-                                            .border_color(gpui::white()),
-                                    )
-                                    .child(
-                                        div()
-                                            .size_8()
-                                            .bg(gpui::white())
-                                            .border_1()
-                                            .border_dashed()
-                                            .rounded_md()
-                                            .border_color(gpui::black()),
-                                    ),
+                                    .size_8()
+                                    .bg(gpui::red())
+                                    .border_1()
+                                    .border_dashed()
+                                    .rounded_md()
+                                    .border_color(gpui::white()),
+                            )
+                            .child(
+                                div()
+                                    .size_8()
+                                    .bg(gpui::green())
+                                    .border_1()
+                                    .border_dashed()
+                                    .rounded_md()
+                                    .border_color(gpui::white()),
+                            )
+                            .child(
+                                div()
+                                    .size_8()
+                                    .bg(gpui::blue())
+                                    .border_1()
+                                    .border_dashed()
+                                    .rounded_md()
+                                    .border_color(gpui::white()),
+                            )
+                            .child(
+                                div()
+                                    .size_8()
+                                    .bg(gpui::yellow())
+                                    .border_1()
+                                    .border_dashed()
+                                    .rounded_md()
+                                    .border_color(gpui::white()),
+                            )
+                            .child(
+                                div()
+                                    .size_8()
+                                    .bg(gpui::black())
+                                    .border_1()
+                                    .border_dashed()
+                                    .rounded_md()
+                                    .rounded_md()
+                                    .border_color(gpui::white()),
+                            )
+                            .child(
+                                div()
+                                    .size_8()
+                                    .bg(gpui::white())
+                                    .border_1()
+                                    .border_dashed()
+                                    .rounded_md()
+                                    .border_color(gpui::black()),
                             ),
                     ),
             )
