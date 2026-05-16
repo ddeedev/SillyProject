@@ -45,13 +45,13 @@ impl RenderOnce for AppSidebar {
         }
 
         if self.hide {
-            return div().child(toggle_btn);
+            return div();
         }
 
         div()
             .w(px(self.width))
             .h_full()
-            .bg(gpui::rgb(0x202020))
+            .bg(gpui::rgb(0x636080))
             .flex()
             .flex_col()
             .child(

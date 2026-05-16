@@ -1,7 +1,7 @@
 use gpui::{
     App, Application, Bounds, Context, FocusHandle, Focusable, KeyBinding, SharedString,
-    TitlebarOptions, Window, WindowBackgroundAppearance, WindowBounds, WindowKind, WindowOptions,
-    div, point, prelude::*, px, rgb, size,
+    TitlebarOptions, TouchPhase, Window, WindowBackgroundAppearance, WindowBounds, WindowKind,
+    WindowOptions, div, point, prelude::*, px, rgb, size,
 };
 use gpui_component::{ActiveTheme, theme};
 use std::rc::Rc;
@@ -70,7 +70,8 @@ impl Render for HelloWorld {
             .flex()
             .flex_row()
             .size_full()
-            .bg(rgb(0x1e1e1e))
+            // line divider sidebar <> main
+            .bg(rgb(0x636080))
             .child(
                 AppSidebar::new(self.sidebar_hidden)
                     .width(self.sidebar_width)
@@ -100,13 +101,12 @@ impl Render for HelloWorld {
                     .flex_col()
                     .flex_1()
                     .gap_3()
-                    .bg(rgb(0x505050))
+                    .bg(rgb(0x7A769F))
                     .h_full()
                     .justify_center()
                     .items_center()
                     .shadow_lg()
                     .border_1()
-                    .border_color(rgb(0x0000ff))
                     .text_xl()
                     .text_color(rgb(0xffffff))
                     .child(format!("Hello, {}!", &self.text))
