@@ -1,1 +1,1 @@
-mod main_content;
+pub mod main_content;
