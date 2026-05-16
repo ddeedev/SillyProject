@@ -101,11 +101,12 @@ impl Render for HelloWorld {
                     .flex_col()
                     .flex_1()
                     .m_2()
-                    .ml_2()
+                    // 2. The styling for the card stroke containe
                     .bg(rgb(0x7A769F))
                     .rounded(px(12.0))
                     .border_1()
                     .border_color(rgb(0x565375))
+                    // Layout and inner children styling
                     .p_4()
                     .gap_3()
                     .justify_center()
