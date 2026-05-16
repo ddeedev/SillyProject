@@ -1,8 +1,12 @@
 use gpui::{
-    App, Application, Bounds, Context, FocusHandle, Focusable, KeyBinding, SharedString, Window,
-    WindowBounds, WindowOptions, div, prelude::*, px, rgb, size,
+    App, Application, Bounds, Context, FocusHandle, Focusable, KeyBinding, SharedString,
+    TitlebarOptions, Window, WindowBackgroundAppearance, WindowBounds, WindowKind, WindowOptions,
+    div, point, prelude::*, px, rgb, size,
 };
-use gpui_component::theme;
+use gpui_component::{ActiveTheme, theme};
+use std::rc::Rc;
+
+use crate::platform::set_traffic_lights_hidden;
 
 use crate::action::{Quit, ToggleSidebar};
 use crate::component::sidebar::AppSidebar;
@@ -21,10 +25,11 @@ impl Focusable for HelloWorld {
 
 impl Render for HelloWorld {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let toggle_action = cx.listener(|this, _event: &gpui::ClickEvent, _window, cx| {
+        set_traffic_lights_hidden(window, self.sidebar_hidden);
+        let toggle_action = Rc::new(cx.listener(|this, _event: &gpui::ClickEvent, _window, cx| {
             this.sidebar_hidden = !this.sidebar_hidden;
             cx.notify();
-        });
+        }));
 
         let keybind_action = cx.listener(|this, _event: &ToggleSidebar, _window, cx| {
             this.sidebar_hidden = !this.sidebar_hidden;
@@ -44,12 +49,13 @@ impl Render for HelloWorld {
             .flex_row()
             .size_full()
             .bg(rgb(0x1e1e1e))
-            .child(
-                AppSidebar::new(self.sidebar_hidden).toggle_sidebar(move |window, cx| {
+            .child(AppSidebar::new(self.sidebar_hidden).toggle_sidebar({
+                let toggle_action = toggle_action.clone();
+                move |window, cx| {
                     toggle_action(&gpui::ClickEvent::default(), window, cx);
-                }),
-            )
-            .child(
+                }
+            }))
+           .child(
                 div()
                     .flex()
                     .flex_col()
@@ -140,30 +146,37 @@ impl AppRunner {
                 KeyBinding::new("cmd-q", Quit, None),
                 KeyBinding::new("cmd-s", ToggleSidebar, Some("main_view")),
             ]);
-            let bounds = Bounds::centered(None, size(px(500.), px(500.0)), cx);
+
             cx.on_window_closed(|cx| {
                 if cx.windows().is_empty() {
                     cx.quit();
                 }
             })
             .detach();
-            cx.open_window(
-                WindowOptions {
-                    window_bounds: Some(WindowBounds::Windowed(bounds)),
-                    ..Default::default()
-                },
-                |window, cx| {
-                    cx.new(|cx| {
-                        let focus_handle = cx.focus_handle();
-                        window.focus(&focus_handle);
-                        HelloWorld {
-                            text: "World".into(),
-                            sidebar_hidden: false,
-                            focus_handle,
-                        }
-                    })
-                },
-            )
+            let titlebar = TitlebarOptions {
+                appears_transparent: true,
+                title: None,
+                traffic_light_position: Some(point(px(12.0), px(20.0))),
+            };
+            let window_option = WindowOptions {
+                titlebar: Some(titlebar),
+                kind: WindowKind::Normal,
+                is_movable: true,
+                window_background: WindowBackgroundAppearance::Opaque,
+                ..Default::default()
+            };
+
+            cx.open_window(window_option, |window, cx| {
+                cx.new(|cx| {
+                    let focus_handle = cx.focus_handle();
+                    window.focus(&focus_handle);
+                    HelloWorld {
+                        text: "World".into(),
+                        sidebar_hidden: false,
+                        focus_handle,
+                    }
+                })
+            })
             .unwrap();
         });
     }

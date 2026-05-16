@@ -6,3 +6,8 @@ edition = "2024"
 [dependencies]
 gpui = "0.2.2"
 gpui-component = "0.5.1"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+raw-window-handle = "0.6"
+objc = "0.2"
+cocoa = "0.25"
