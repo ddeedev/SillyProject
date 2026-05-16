@@ -1,6 +1,6 @@
 use gpui::{
-    App, Application, Bounds, Context, KeyBinding, SharedString, Window, WindowBounds,
-    WindowOptions, div, prelude::*, px, rgb, size,
+    App, Application, Bounds, Context, FocusHandle, Focusable, KeyBinding, SharedString, Window,
+    WindowBounds, WindowOptions, div, prelude::*, px, rgb, size,
 };
 use gpui_component::theme;
 
@@ -10,10 +10,17 @@ use crate::component::sidebar::AppSidebar;
 struct HelloWorld {
     text: SharedString,
     sidebar_hidden: bool,
+    focus_handle: FocusHandle,
+}
+
+impl Focusable for HelloWorld {
+    fn focus_handle(&self, _cx: &App) -> FocusHandle {
+        self.focus_handle.clone()
+    }
 }
 
 impl Render for HelloWorld {
-    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let toggle_action = cx.listener(|this, _event: &gpui::ClickEvent, _window, cx| {
             this.sidebar_hidden = !this.sidebar_hidden;
             cx.notify();
@@ -26,6 +33,7 @@ impl Render for HelloWorld {
 
         div()
             .key_context("main_view")
+            .track_focus(&self.focus_handle)
             .on_action(|_: &Quit, window, _| {
                 window.remove_window();
             })
@@ -144,10 +152,15 @@ impl AppRunner {
                     window_bounds: Some(WindowBounds::Windowed(bounds)),
                     ..Default::default()
                 },
-                |_, cx| {
-                    cx.new(|_| HelloWorld {
-                        text: "World".into(),
-                        sidebar_hidden: false,
+                |window, cx| {
+                    cx.new(|cx| {
+                        let focus_handle = cx.focus_handle();
+                        window.focus(&focus_handle);
+                        HelloWorld {
+                            text: "World".into(),
+                            sidebar_hidden: false,
+                            focus_handle,
+                        }
                     })
                 },
             )
