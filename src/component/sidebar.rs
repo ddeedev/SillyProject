@@ -45,11 +45,29 @@ impl RenderOnce for AppSidebar {
             .w(px(240.0))
             .h_full()
             .bg(gpui::rgb(0x202020))
-            .p_4()
             .flex()
             .flex_col()
-            .gap_4()
-            .child(toggle_btn)
-            .child(div().child("Sidebar Content"))
+            .child(
+                div()
+                    .h(px(52.0))
+                    .w_full()
+                    .flex()
+                    .items_end()
+                    .pb_2()
+                    .pl(px(76.0))
+                    .on_mouse_move(|_, window, _| {
+                        window.start_window_move();
+                    })
+                    .child(toggle_btn),
+            )
+            .child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .flex_1()
+                    .p_4()
+                    .gap_4()
+                    .child(div().child("Sidebar Content")),
+            )
     }
 }
