@@ -6,7 +6,9 @@ use std::rc::Rc;
 
 #[derive(IntoElement)]
 pub struct AppSidebar {
+    // state
     hide: bool,
+    // event
     on_toggle: Option<Rc<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
@@ -26,16 +28,16 @@ impl AppSidebar {
 
 impl RenderOnce for AppSidebar {
     fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
-        if self.hide {
-            return div();
-        }
-
         let mut toggle_btn = Button::new("Hide Sidebar");
 
         if let Some(on_toggle) = self.on_toggle {
             toggle_btn = toggle_btn.on_click(move |_, window, ctx| {
                 on_toggle(window, ctx);
             })
+        }
+
+        if self.hide {
+            return div().child(toggle_btn);
         }
 
         div()
@@ -46,7 +48,7 @@ impl RenderOnce for AppSidebar {
             .flex()
             .flex_col()
             .gap_4()
-            .child(toggle_btn) // Render the button
+            .child(toggle_btn)
             .child(div().child("Sidebar Content"))
     }
 }
