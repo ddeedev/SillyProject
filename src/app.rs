@@ -1,9 +1,10 @@
 use gpui::{
-    App, Application, Bounds, Context, SharedString, Window, WindowBounds, WindowOptions, div,
-    prelude::*, px, rgb, size,
+    App, Application, Bounds, Context, KeyBinding, SharedString, Window, WindowBounds,
+    WindowOptions, div, prelude::*, px, rgb, size,
 };
 use gpui_component::theme;
 
+use crate::action::{Quit, ToggleSidebar};
 use crate::component::sidebar::AppSidebar;
 
 struct HelloWorld {
@@ -18,7 +19,19 @@ impl Render for HelloWorld {
             cx.notify();
         });
 
+        let keybind_action = cx.listener(|this, _event: &ToggleSidebar, _window, cx| {
+            this.sidebar_hidden = !this.sidebar_hidden;
+            cx.notify();
+        });
+
         div()
+            .key_context("main_view")
+            .on_action(|_: &Quit, window, _| {
+                window.remove_window();
+            })
+            .on_action(move |event: &ToggleSidebar, _window, cx| {
+                keybind_action(event, _window, cx);
+            })
             .flex()
             .flex_row()
             .size_full()
@@ -108,13 +121,24 @@ impl Render for HelloWorld {
     }
 }
 
-pub struct SetupApp;
+pub struct AppRunner;
 
-impl SetupApp {
+impl AppRunner {
     pub fn run() {
         Application::new().run(|cx: &mut App| {
             theme::init(cx);
+            cx.on_action(|_: &Quit, cx| cx.quit());
+            cx.bind_keys([
+                KeyBinding::new("cmd-q", Quit, None),
+                KeyBinding::new("cmd-s", ToggleSidebar, Some("main_view")),
+            ]);
             let bounds = Bounds::centered(None, size(px(500.), px(500.0)), cx);
+            cx.on_window_closed(|cx| {
+                if cx.windows().is_empty() {
+                    cx.quit();
+                }
+            })
+            .detach();
             cx.open_window(
                 WindowOptions {
                     window_bounds: Some(WindowBounds::Windowed(bounds)),

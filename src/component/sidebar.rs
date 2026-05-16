@@ -1,4 +1,5 @@
-use gpui::{AnyElement, App, Entity, IntoElement, Style, Window, div, prelude::*, px};
+use crate::action::ToggleSidebar;
+use gpui::{AnyElement, App, Entity, IntoElement, KeyBinding, Style, Window, div, prelude::*, px};
 use gpui_component::button::Button;
 use gpui_component::input::InputState;
 use gpui_component::{ActiveTheme, Icon};

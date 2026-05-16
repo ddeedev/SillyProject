@@ -4,5 +4,5 @@ mod app;
 mod component;
 
 fn main() {
-    app::SetupApp::run();
+    app::AppRunner::run();
 }
