@@ -55,7 +55,7 @@ impl Render for HelloWorld {
                     toggle_action(&gpui::ClickEvent::default(), window, cx);
                 }
             }))
-           .child(
+            .child(
                 div()
                     .flex()
                     .flex_col()
