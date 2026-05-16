@@ -14,12 +14,22 @@ use crate::component::sidebar::AppSidebar;
 struct HelloWorld {
     text: SharedString,
     sidebar_hidden: bool,
+    sidebar_width: f32,
     focus_handle: FocusHandle,
 }
 
 impl Focusable for HelloWorld {
     fn focus_handle(&self, _cx: &App) -> FocusHandle {
         self.focus_handle.clone()
+    }
+}
+
+#[derive(Clone)]
+struct SidebarResizeDrag;
+
+impl Render for SidebarResizeDrag {
+    fn render(&mut self, _window: &mut Window, _cx: &mut gpui::Context<Self>) -> impl IntoElement {
+        div().w(px(4.0)).h_full()
     }
 }
 
@@ -36,6 +46,8 @@ impl Render for HelloWorld {
             cx.notify();
         });
 
+        let entity = cx.entity();
+
         div()
             .key_context("main_view")
             .track_focus(&self.focus_handle)
@@ -45,16 +57,43 @@ impl Render for HelloWorld {
             .on_action(move |event: &ToggleSidebar, _window, cx| {
                 keybind_action(event, _window, cx);
             })
+            .on_drag_move(
+                move |event: &gpui::DragMoveEvent<SidebarResizeDrag>, _window, cx| {
+                    let pos: f32 = event.event.position.x.into();
+                    let new_width = pos.clamp(200.0, 500.0);
+                    entity.update(cx, |view, cx| {
+                        view.sidebar_width = new_width;
+                        cx.notify();
+                    });
+                },
+            )
             .flex()
             .flex_row()
             .size_full()
             .bg(rgb(0x1e1e1e))
-            .child(AppSidebar::new(self.sidebar_hidden).toggle_sidebar({
-                let toggle_action = toggle_action.clone();
-                move |window, cx| {
-                    toggle_action(&gpui::ClickEvent::default(), window, cx);
-                }
-            }))
+            .child(
+                AppSidebar::new(self.sidebar_hidden)
+                    .width(self.sidebar_width)
+                    .toggle_sidebar({
+                        let toggle_action = toggle_action.clone();
+                        move |window, cx| {
+                            toggle_action(&gpui::ClickEvent::default(), window, cx);
+                        }
+                    }),
+            )
+            .when(!self.sidebar_hidden, |el| {
+                el.child(
+                    div()
+                        .id("sidebar-resize-handle")
+                        .w(px(5.0))
+                        .h_full()
+                        .cursor_col_resize()
+                        .hover(|s| s.bg(rgb(0x555555)))
+                        .on_drag(SidebarResizeDrag, |_, _, _, cx| {
+                            cx.new(|_| SidebarResizeDrag)
+                        }),
+                )
+            })
             .child(
                 div()
                     .flex()
@@ -71,66 +110,7 @@ impl Render for HelloWorld {
                     .text_xl()
                     .text_color(rgb(0xffffff))
                     .child(format!("Hello, {}!", &self.text))
-                    .child(
-                        div()
-                            .flex()
-                            .gap_2()
-                            .child(
-                                div()
-                                    .size_8()
-                                    .bg(gpui::red())
-                                    .border_1()
-                                    .border_dashed()
-                                    .rounded_md()
-                                    .border_color(gpui::white()),
-                            )
-                            .child(
-                                div()
-                                    .size_8()
-                                    .bg(gpui::green())
-                                    .border_1()
-                                    .border_dashed()
-                                    .rounded_md()
-                                    .border_color(gpui::white()),
-                            )
-                            .child(
-                                div()
-                                    .size_8()
-                                    .bg(gpui::blue())
-                                    .border_1()
-                                    .border_dashed()
-                                    .rounded_md()
-                                    .border_color(gpui::white()),
-                            )
-                            .child(
-                                div()
-                                    .size_8()
-                                    .bg(gpui::yellow())
-                                    .border_1()
-                                    .border_dashed()
-                                    .rounded_md()
-                                    .border_color(gpui::white()),
-                            )
-                            .child(
-                                div()
-                                    .size_8()
-                                    .bg(gpui::black())
-                                    .border_1()
-                                    .border_dashed()
-                                    .rounded_md()
-                                    .rounded_md()
-                                    .border_color(gpui::white()),
-                            )
-                            .child(
-                                div()
-                                    .size_8()
-                                    .bg(gpui::white())
-                                    .border_1()
-                                    .border_dashed()
-                                    .rounded_md()
-                                    .border_color(gpui::black()),
-                            ),
-                    ),
+                    .child(div()),
             )
     }
 }
@@ -173,6 +153,7 @@ impl AppRunner {
                     HelloWorld {
                         text: "World".into(),
                         sidebar_hidden: false,
+                        sidebar_width: 240.0,
                         focus_handle,
                     }
                 })

@@ -9,6 +9,7 @@ use std::rc::Rc;
 pub struct AppSidebar {
     // state
     hide: bool,
+    width: f32,
     // event
     on_toggle: Option<Rc<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
@@ -17,8 +18,14 @@ impl AppSidebar {
     pub fn new(hide: bool) -> Self {
         Self {
             hide,
+            width: 240.0,
             on_toggle: None,
         }
+    }
+
+    pub fn width(mut self, width: f32) -> Self {
+        self.width = width;
+        self
     }
 
     pub fn toggle_sidebar(mut self, f: impl Fn(&mut Window, &mut App) + 'static) -> Self {
@@ -42,7 +49,7 @@ impl RenderOnce for AppSidebar {
         }
 
         div()
-            .w(px(240.0))
+            .w(px(self.width))
             .h_full()
             .bg(gpui::rgb(0x202020))
             .flex()
