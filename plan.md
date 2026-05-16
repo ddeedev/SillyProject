@@ -7,3 +7,5 @@
 4. Title bar color
 5. Drag to resize Sidebar
 6. Hide traffic light when sidebar is hide
+7. Setting Menus
+8. MainContent UI
