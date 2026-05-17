@@ -92,10 +92,10 @@ impl Render for MainContent {
                 el.child(
                     div()
                         .id("sidebar-resize-handle")
-                        .w(px(5.0))
+                        .w(px(3.0))
                         .h_full()
                         .cursor_col_resize()
-                        .hover(|s| s.bg(rgb(0x555555)))
+                        .hover(|s| s.bg(rgb(0x827e7e)))
                         .on_drag(SidebarResizeDrag, |_, _, _, cx| {
                             cx.new(|_| SidebarResizeDrag)
                         }),
@@ -107,6 +107,8 @@ impl Render for MainContent {
                     .flex_col()
                     .flex_1()
                     .m_2()
+                    .when(!self.sidebar_hidden, |el| el.ml_0())
+                    .when(self.sidebar_hidden, |el| el.ml_2())
                     // 2. The styling for the card stroke containe
                     .bg(rgb(0x7A769F))
                     .rounded(px(12.0))
