@@ -12,3 +12,9 @@
 | Sidebar ICON                           | Doing  |
 | Favorite Tab                           | Plan   |
 | Folder                                 | Plan   |
+
+## Must have feature for V0.1.0
+
+1. RestAPI Request with Header and Authen Support
+2. Multi Profile
+3. Smoothly Switching Profile with UX of Arc browser like
