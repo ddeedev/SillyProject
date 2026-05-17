@@ -76,6 +76,7 @@ impl RenderOnce for AppSidebar {
                         .rounded(px(6.0))
                         .border_color(rgb(0x565375))
                         .text_xl()
+                        .text_center()
                         .justify_center()
                         .items_center()
                         .text_color(rgb(0xF8F8F8))
