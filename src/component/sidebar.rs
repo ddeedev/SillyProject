@@ -1,5 +1,7 @@
 use crate::action::ToggleSidebar;
-use gpui::{AnyElement, App, Entity, IntoElement, KeyBinding, Style, Window, div, prelude::*, px};
+use gpui::{
+    AnyElement, App, Entity, IntoElement, KeyBinding, Style, Window, div, prelude::*, px, rgb,
+};
 use gpui_component::button::Button;
 use gpui_component::input::InputState;
 use gpui_component::{ActiveTheme, Icon};
@@ -68,13 +70,18 @@ impl RenderOnce for AppSidebar {
                     .child(toggle_btn),
             )
             .child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .flex_1()
-                    .p_4()
-                    .gap_4()
-                    .child(div().child("Sidebar Content")),
+                div().flex().flex_col().flex_1().p_2().gap_2().child(
+                    div()
+                        .bg(rgb(0x7A769F))
+                        .rounded(px(6.0))
+                        .border_color(rgb(0x565375))
+                        .text_xl()
+                        .justify_center()
+                        .items_center()
+                        .text_color(rgb(0xF8F8F8))
+                        .opacity(0.5)
+                        .child("Sidebar Content"),
+                ),
             )
     }
 }
