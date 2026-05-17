@@ -42,6 +42,7 @@ impl AppRunner {
                 cx.new(|cx| Root::new(main_conten, window, cx))
             })
             .unwrap();
+            cx.activate(true);
         });
     }
 }
