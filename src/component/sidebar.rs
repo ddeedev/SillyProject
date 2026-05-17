@@ -38,7 +38,13 @@ impl AppSidebar {
 
 impl RenderOnce for AppSidebar {
     fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
-        let mut toggle_btn = Button::new("Hide Sidebar");
+        let mut toggle_btn = div()
+            .id("sidebar-toggle")
+            .w(px(24.0))
+            .h(px(20.0))
+            .border_3()
+            .border_color(gpui::rgb(0x373738))
+            .cursor_pointer();
 
         if let Some(on_toggle) = self.on_toggle {
             toggle_btn = toggle_btn.on_click(move |_, window, ctx| {
@@ -58,30 +64,39 @@ impl RenderOnce for AppSidebar {
             .flex_col()
             .child(
                 div()
-                    .h(px(52.0))
+                    .mt_3()
                     .w_full()
                     .flex()
-                    .items_end()
+                    .items_center()
+                    .justify_end()
                     .pb_2()
-                    .pl(px(76.0))
                     .on_mouse_move(|_, window, _| {
                         window.start_window_move();
                     })
                     .child(toggle_btn),
             )
             .child(
-                div().flex().flex_col().flex_1().p_2().gap_2().child(
+                div().flex().flex_col().flex_1().m_2().mr_1().child(
                     div()
+                        .flex()
+                        .flex_row()
+                        .items_center()
+                        .justify_center()
+                        .gap_2()
                         .bg(rgb(0x7A769F))
                         .rounded(px(6.0))
                         .border_color(rgb(0x565375))
                         .text_xl()
                         .text_center()
-                        .justify_center()
-                        .items_center()
                         .text_color(rgb(0xF8F8F8))
                         .opacity(0.5)
-                        .child("Sidebar Content"),
+                        .font_family("Menlo")
+                        .child(div().child("⭐"))
+                        .child(
+                            div()
+                                .child("Workspace")
+                                .font_weight(gpui::FontWeight::EXTRA_BOLD),
+                        ),
                 ),
             )
     }

@@ -2,7 +2,7 @@ use crate::action::{Quit, ToggleSidebar};
 use crate::view::main_content::MainContent;
 use gpui::{
     App, Application, KeyBinding, TitlebarOptions, WindowBackgroundAppearance, WindowKind,
-    WindowOptions, prelude::*,
+    WindowOptions, point, prelude::*, px,
 };
 use gpui_component::{Root, theme};
 
@@ -25,9 +25,9 @@ impl AppRunner {
             })
             .detach();
             let titlebar = TitlebarOptions {
+                traffic_light_position: Some(point(px(12.), px(12.))),
                 appears_transparent: true,
                 title: None,
-                ..Default::default()
             };
             let window_option = WindowOptions {
                 titlebar: Some(titlebar),
