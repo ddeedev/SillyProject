@@ -1,3 +1,4 @@
+// GPUI did not support hiding traffic ligt ui yet
 #[cfg(target_os = "macos")]
 pub fn set_traffic_lights_hidden(window: &mut gpui::Window, hidden: bool) {
     use objc::{msg_send, sel, sel_impl};
