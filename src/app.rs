@@ -1,8 +1,9 @@
 use crate::action::{Quit, ToggleSidebar};
+use crate::assets::{Assets, load_font_data, load_fonts_asset};
 use crate::view::main_content::MainContent;
 use gpui::{
-    App, Application, KeyBinding, TitlebarOptions, WindowBackgroundAppearance, WindowKind,
-    WindowOptions, point, prelude::*, px,
+    App, Application, AssetSource, KeyBinding, SharedString, TitlebarOptions,
+    WindowBackgroundAppearance, WindowKind, WindowOptions, point, prelude::*, px,
 };
 use gpui_component::{Root, theme};
 
@@ -10,7 +11,10 @@ pub struct AppRunner;
 
 impl AppRunner {
     pub fn run() {
-        Application::new().run(|cx: &mut App| {
+        Application::new().with_assets(Assets).run(|cx: &mut App| {
+            // load asset
+            load_fonts_asset(cx);
+
             theme::init(cx);
             cx.on_action(|_: &Quit, cx| cx.quit());
             cx.bind_keys([

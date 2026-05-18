@@ -4,6 +4,7 @@ mod app;
 mod component;
 mod platform;
 mod view;
+mod assets;
 
 fn main() {
     app::AppRunner::run();

@@ -5140,11 +5140,13 @@ dependencies = [
 name = "silly"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "cocoa 0.25.0",
  "gpui",
  "gpui-component",
  "objc",
  "raw-window-handle",
+ "rust-embed",
 ]
 
 [[package]]

@@ -1,6 +1,6 @@
 use crate::action::ToggleSidebar;
 use gpui::{
-    AnyElement, App, Entity, IntoElement, KeyBinding, Style, Window, div, prelude::*, px, rgb,
+    AnyElement, App, Entity, IntoElement, KeyBinding, Style, Window, div, prelude::*, px, rgb, svg,
 };
 use gpui_component::button::Button;
 use gpui_component::input::InputState;
@@ -38,13 +38,25 @@ impl AppSidebar {
 
 impl RenderOnce for AppSidebar {
     fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
-        let mut toggle_btn = div()
-            .id("sidebar-toggle")
+        let toggle_icon = svg()
+            .path("icon/sidebar-left-svgrepo-com.svg")
             .w(px(24.0))
             .h(px(20.0))
-            .border_3()
-            .border_color(gpui::rgb(0x373738))
-            .cursor_pointer();
+            .rounded(px(6.0))
+            .text_color(rgb(0xF8F8F8))
+            .opacity(0.5);
+
+        let mut toggle_btn = div()
+            .id("sidebar-toggle")
+            .w(px(30.0))
+            .h(px(28.0))
+            .rounded(px(6.0))
+            .cursor_pointer()
+            .flex()
+            .justify_center()
+            .items_center()
+            .child(toggle_icon)
+            .hover(|style| style.bg(rgb(0x7A769F)).rounded(px(6.0)));
 
         if let Some(on_toggle) = self.on_toggle {
             toggle_btn = toggle_btn.on_click(move |_, window, ctx| {
@@ -64,7 +76,7 @@ impl RenderOnce for AppSidebar {
             .flex_col()
             .child(
                 div()
-                    .mt_3()
+                    .mt_2()
                     .w_full()
                     .flex()
                     .items_center()
@@ -90,11 +102,11 @@ impl RenderOnce for AppSidebar {
                         .text_center()
                         .text_color(rgb(0xF8F8F8))
                         .opacity(0.5)
-                        .font_family("Menlo")
+                        .font_family("Pacifico")
                         .child(div().child("⭐"))
                         .child(
                             div()
-                                .child("Workspace")
+                                .child("WorkSpace")
                                 .font_weight(gpui::FontWeight::EXTRA_BOLD),
                         ),
                 ),

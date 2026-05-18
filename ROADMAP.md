@@ -18,14 +18,15 @@
 | Drag to resize Sidebar                 | Done   |
 | Hide Traffic light when sidebar hidden | Done   |
 | Profile banner                         | Done   |
-| Sidebar ICON                           | Doing  |
-| Favorite Tab                           | Plan   |
+| Sidebar ICON                           | Done   |
+| Favorite Tab                           | Doing  |
 | Folder                                 | Plan   |
 | Request View                           | Plan   |
 | Header View                            | Plan   |
 | Authen View                            | Plan   |
 | ENV View                               | Plan   |
 | Theme per Profile                      | Plan   |
+| Config                                 | Plan   |
 
 ### Funtional
 
