@@ -19,8 +19,8 @@
 | Hide Traffic light when sidebar hidden | Done   |
 | Profile banner                         | Done   |
 | Sidebar ICON                           | Done   |
-| Favorite Tab                           | Doing  |
-| Folder                                 | Plan   |
+| Favorite Tab                           | Done   |
+| Folder                                 | Doin   |
 | Request View                           | Plan   |
 | Header View                            | Plan   |
 | Authen View                            | Plan   |
