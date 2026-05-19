@@ -51,7 +51,9 @@ impl RenderOnce for AppSidebar {
                     .m_2()
                     .mr_1()
                     .child(self.render_workspace_card())
-                    .child(self.favorite_tap()),
+                    .child(self.favorite_tap())
+                    .child(self.folder_request())
+                    .child(self.space_selection()),
             )
     }
 }
@@ -151,5 +153,20 @@ impl AppSidebar {
 
     fn folder_request(&self) -> impl IntoElement {
         div()
+            .mt_4()
+            .w_full()
+            .h_full()
+            .mb_4()
+            .gap_2()
+            .bg(rgb(0xffffff))
+    }
+
+    fn space_selection(&self) -> impl IntoElement {
+        div()
+            .mt_1()
+            .w_full()
+            .h(px(50.0))
+            .bg(rgb(0x7A769F))
+            .rounded(px(6.0))
     }
 }
