@@ -17,7 +17,7 @@ impl MainContent {
     pub fn new(cx: &mut Context<Self>) -> Self {
         Self {
             sidebar_hidden: false,
-            sidebar_width: 240.0,
+            sidebar_width: 242.0,
             text: "Hello".into(),
             focus_handle: cx.focus_handle(),
         }

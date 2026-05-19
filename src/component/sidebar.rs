@@ -142,7 +142,7 @@ impl AppSidebar {
                 let element_id: gpui::SharedString = format!("grid-item-{}", index).into();
                 div()
                     .id(element_id)
-                    .w(px(70.0))
+                    .w(gpui::relative(0.31))
                     .h(px(60.0))
                     .bg(rgb(0x7A769F))
                     .rounded(px(10.0))
