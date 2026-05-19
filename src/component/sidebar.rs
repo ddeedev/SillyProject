@@ -50,9 +50,10 @@ impl RenderOnce for AppSidebar {
                     .flex_1()
                     .m_2()
                     .mr_1()
+                    .gap_2()
                     .child(self.render_workspace_card())
                     .child(self.favorite_tap())
-                    .child(self.folder_request())
+                    .child(div().gap_2().flex_1().child(self.folder_request()))
                     .child(self.space_selection()),
             )
     }
@@ -123,8 +124,18 @@ impl AppSidebar {
     }
 
     fn favorite_tap(&self) -> impl IntoElement {
+        let gap = 8.0_f32;
+        let available = self.width - 20.0;
+        let cols: u32 = if self.width <= 200.0 {
+            1
+        } else if self.width < 242.0 {
+            2
+        } else {
+            3
+        };
+        let _item_width = px((available - gap * (cols as f32 - 1.0)) / cols as f32);
+
         div()
-            .mt_2()
             .w_full()
             .flex()
             .flex_row()
@@ -133,11 +144,12 @@ impl AppSidebar {
             .gap_2()
             .text_xl()
             .text_color(rgb(0xF8F8F8))
-            .children((0..9).map(|index| {
+            .children((0..9).map(move |index| {
                 let element_id: gpui::SharedString = format!("grid-item-{}", index).into();
                 div()
                     .id(element_id)
-                    .when(self.width / 3.0 < 80.0, |el| el.w(gpui::relative(0.48)))
+                    // .w(item_width)
+                    .when(self.width / 3.0 <= 80.0, |el| el.w(gpui::relative(0.48)))
                     .when(self.width / 3.0 > 80.0, |el| el.w(gpui::relative(0.31)))
                     .h(px(60.0))
                     .bg(rgb(0x7A769F))
@@ -152,20 +164,13 @@ impl AppSidebar {
     }
 
     fn folder_request(&self) -> impl IntoElement {
-        div()
-            .mt_4()
-            .w_full()
-            .h_full()
-            .mb_4()
-            .gap_2()
-            .bg(rgb(0xffffff))
+        div().w_full().h_full().bg(rgb(0xffffff))
     }
 
     fn space_selection(&self) -> impl IntoElement {
         div()
-            .mt_1()
-            .w_full()
-            .h(px(50.0))
+            .flex_shrink_0()
+            .h(px(30.0))
             .bg(rgb(0x7A769F))
             .rounded(px(6.0))
     }
