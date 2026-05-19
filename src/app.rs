@@ -1,9 +1,9 @@
 use crate::action::{Quit, ToggleSidebar};
-use crate::assets::{Assets, load_font_data, load_fonts_asset};
+use crate::assets::{Assets, load_fonts_asset};
 use crate::view::main_content::MainContent;
 use gpui::{
-    App, Application, AssetSource, KeyBinding, SharedString, TitlebarOptions,
-    WindowBackgroundAppearance, WindowKind, WindowOptions, point, prelude::*, px,
+    App, Application, KeyBinding, TitlebarOptions, WindowBackgroundAppearance, WindowKind,
+    WindowOptions, point, prelude::*, px,
 };
 use gpui_component::{Root, theme};
 

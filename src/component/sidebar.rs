@@ -1,11 +1,4 @@
-use crate::action::ToggleSidebar;
-use gpui::{
-    AnyElement, App, Entity, IntoElement, KeyBinding, Style, Window, div, prelude::*, px, rgb, svg,
-};
-use gpui_component::button::Button;
-use gpui_component::input::InputState;
-use gpui_component::{ActiveTheme, Icon};
-use std::fmt::format;
+use gpui::{App, IntoElement, Window, div, prelude::*, px, rgb, svg};
 use std::rc::Rc;
 
 #[derive(IntoElement)]
