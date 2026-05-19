@@ -5,6 +5,7 @@ use gpui::{
 use gpui_component::button::Button;
 use gpui_component::input::InputState;
 use gpui_component::{ActiveTheme, Icon};
+use std::fmt::format;
 use std::rc::Rc;
 
 #[derive(IntoElement)]
@@ -38,14 +39,32 @@ impl AppSidebar {
 
 impl RenderOnce for AppSidebar {
     fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
-        let toggle_icon = svg()
-            .path("icon/sidebar-left-svgrepo-com.svg")
-            .w(px(24.0))
-            .h(px(20.0))
-            .rounded(px(6.0))
-            .text_color(rgb(0xF8F8F8))
-            .opacity(0.5);
+        if self.hide {
+            return div();
+        }
 
+        div()
+            .w(px(self.width))
+            .h_full()
+            .bg(rgb(0x636080))
+            .flex()
+            .flex_col()
+            .child(self.render_header())
+            .child(
+                div()
+                    .flex()
+                    .flex_col()
+                    .flex_1()
+                    .m_2()
+                    .mr_1()
+                    .child(self.render_workspace_card())
+                    .child(self.render_grid_items()),
+            )
+    }
+}
+
+impl AppSidebar {
+    fn render_header(&self) -> impl IntoElement {
         let mut toggle_btn = div()
             .id("sidebar-toggle")
             .w(px(30.0))
@@ -55,61 +74,85 @@ impl RenderOnce for AppSidebar {
             .flex()
             .justify_center()
             .items_center()
-            .child(toggle_icon)
-            .hover(|style| style.bg(rgb(0x7A769F)).rounded(px(6.0)));
+            .hover(|style| style.bg(rgb(0x7A769F)))
+            .child(
+                svg()
+                    .path("icon/sidebar-left-svgrepo-com.svg")
+                    .w(px(18.0))
+                    .h(px(16.0))
+                    .text_color(rgb(0xF8F8F8))
+                    .opacity(0.5),
+            );
 
-        if let Some(on_toggle) = self.on_toggle {
+        if let Some(on_toggle) = &self.on_toggle {
+            let on_toggle = on_toggle.clone();
             toggle_btn = toggle_btn.on_click(move |_, window, ctx| {
                 on_toggle(window, ctx);
-            })
-        }
-
-        if self.hide {
-            return div();
+            });
         }
 
         div()
-            .w(px(self.width))
-            .h_full()
-            .bg(gpui::rgb(0x636080))
+            .mt_2()
+            .w_full()
             .flex()
-            .flex_col()
+            .items_center()
+            .justify_end()
+            .pb_2()
+            .on_mouse_move(|_, window, _| {
+                window.start_window_move();
+            })
+            .child(toggle_btn)
+    }
+
+    fn render_workspace_card(&self) -> impl IntoElement {
+        div()
+            .flex()
+            .flex_row()
+            .items_center()
+            .justify_center()
+            .gap_2()
+            .bg(rgb(0x7A769F))
+            .rounded(px(6.0))
+            .border_color(rgb(0x565375))
+            .text_xl()
+            .text_center()
+            .text_color(rgb(0xF8F8F8))
+            .opacity(0.5)
+            .font_family("Pacifico")
+            .child(div().child("⭐"))
             .child(
                 div()
-                    .mt_2()
-                    .w_full()
-                    .flex()
+                    .child("WorkSpace")
+                    .font_weight(gpui::FontWeight::EXTRA_BOLD),
+            )
+    }
+
+    fn render_grid_items(&self) -> impl IntoElement {
+        div()
+            .mt_2()
+            .flex()
+            .flex_row()
+            .items_center()
+            .justify_center()
+            .gap_2()
+            .rounded(px(6.0))
+            .text_xl()
+            .text_center()
+            .text_color(rgb(0xF8F8F8))
+            .opacity(0.5)
+            .children((0..3).map(|index| {
+                let element_id: gpui::SharedString = format!("grid-item-{}", index).into();
+                div()
+                    .id(element_id)
+                    .bg(rgb(0x7A769F))
+                    .rounded(px(10.0))
+                    .cursor_pointer()
+                    .flex_1()
+                    .justify_center()
                     .items_center()
-                    .justify_end()
-                    .pb_2()
-                    .on_mouse_move(|_, window, _| {
-                        window.start_window_move();
-                    })
-                    .child(toggle_btn),
-            )
-            .child(
-                div().flex().flex_col().flex_1().m_2().mr_1().child(
-                    div()
-                        .flex()
-                        .flex_row()
-                        .items_center()
-                        .justify_center()
-                        .gap_2()
-                        .bg(rgb(0x7A769F))
-                        .rounded(px(6.0))
-                        .border_color(rgb(0x565375))
-                        .text_xl()
-                        .text_center()
-                        .text_color(rgb(0xF8F8F8))
-                        .opacity(0.5)
-                        .font_family("Pacifico")
-                        .child(div().child("⭐"))
-                        .child(
-                            div()
-                                .child("WorkSpace")
-                                .font_weight(gpui::FontWeight::EXTRA_BOLD),
-                        ),
-                ),
-            )
+                    .hover(|style| style.bg(rgb(0x565375)))
+                    .child(format!("{}", index + 1))
+                    .text_center()
+            }))
     }
 }
