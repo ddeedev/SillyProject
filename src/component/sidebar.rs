@@ -130,29 +130,28 @@ impl AppSidebar {
     fn render_grid_items(&self) -> impl IntoElement {
         div()
             .mt_2()
+            .w_full()
             .flex()
             .flex_row()
-            .items_center()
-            .justify_center()
+            .flex_wrap()
+            .justify_start()
             .gap_2()
-            .rounded(px(6.0))
             .text_xl()
-            .text_center()
             .text_color(rgb(0xF8F8F8))
-            .opacity(0.5)
-            .children((0..3).map(|index| {
+            .children((0..9).map(|index| {
                 let element_id: gpui::SharedString = format!("grid-item-{}", index).into();
                 div()
                     .id(element_id)
+                    .w(px(70.0))
+                    .h(px(60.0))
                     .bg(rgb(0x7A769F))
                     .rounded(px(10.0))
                     .cursor_pointer()
-                    .flex_1()
+                    .flex()
                     .justify_center()
                     .items_center()
                     .hover(|style| style.bg(rgb(0x565375)))
-                    .child(format!("{}", index + 1))
-                    .text_center()
+                    .child(div().opacity(0.5).child(format!("{}", index + 1)))
             }))
     }
 }
