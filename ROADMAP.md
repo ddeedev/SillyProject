@@ -20,7 +20,7 @@
 | Profile banner                         | Done   |
 | Sidebar ICON                           | Done   |
 | Favorite Tab                           | Done   |
-| Folder                                 | Doin   |
+| Folder                                 | Doing  |
 | Request View                           | Plan   |
 | Header View                            | Plan   |
 | Authen View                            | Plan   |

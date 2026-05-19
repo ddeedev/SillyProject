@@ -51,7 +51,7 @@ impl RenderOnce for AppSidebar {
                     .m_2()
                     .mr_1()
                     .child(self.render_workspace_card())
-                    .child(self.render_grid_items()),
+                    .child(self.favorite_tap()),
             )
     }
 }
@@ -70,7 +70,7 @@ impl AppSidebar {
             .hover(|style| style.bg(rgb(0x7A769F)))
             .child(
                 svg()
-                    .path("icon/sidebar-left-svgrepo-com.svg")
+                    .path("icon/sidebar-left.svg")
                     .w(px(18.0))
                     .h(px(16.0))
                     .text_color(rgb(0xF8F8F8))
@@ -120,7 +120,7 @@ impl AppSidebar {
             )
     }
 
-    fn render_grid_items(&self) -> impl IntoElement {
+    fn favorite_tap(&self) -> impl IntoElement {
         div()
             .mt_2()
             .w_full()
@@ -135,7 +135,8 @@ impl AppSidebar {
                 let element_id: gpui::SharedString = format!("grid-item-{}", index).into();
                 div()
                     .id(element_id)
-                    .w(gpui::relative(0.31))
+                    .when(self.width / 3.0 < 80.0, |el| el.w(gpui::relative(0.48)))
+                    .when(self.width / 3.0 > 80.0, |el| el.w(gpui::relative(0.31)))
                     .h(px(60.0))
                     .bg(rgb(0x7A769F))
                     .rounded(px(10.0))
@@ -146,5 +147,9 @@ impl AppSidebar {
                     .hover(|style| style.bg(rgb(0x565375)))
                     .child(div().opacity(0.5).child(format!("{}", index + 1)))
             }))
+    }
+
+    fn folder_request(&self) -> impl IntoElement {
+        div()
     }
 }
