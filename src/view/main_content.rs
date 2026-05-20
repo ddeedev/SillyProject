@@ -11,15 +11,19 @@ pub struct MainContent {
     sidebar_hidden: bool,
     sidebar_width: f32,
     focus_handle: FocusHandle,
+    bounds_observed: bool,
 }
 
 impl MainContent {
     pub fn new(cx: &mut Context<Self>) -> Self {
+        // NOTE: observe_window_bounds must be called during render when we have
+        // a Window reference, so we log width during the drag-resize handler instead.
         Self {
             sidebar_hidden: false,
             sidebar_width: 242.0,
             text: "Hello".into(),
             focus_handle: cx.focus_handle(),
+            bounds_observed: true,
         }
     }
 }
@@ -42,6 +46,17 @@ impl Focusable for MainContent {
 impl Render for MainContent {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         set_traffic_lights_hidden(window, self.sidebar_hidden);
+
+        if !self.bounds_observed {
+            self.bounds_observed = true;
+            cx.observe_window_bounds(window, |_this, window, _cx| {
+                let size = window.viewport_size();
+                let w: f32 = size.width.into();
+                let h: f32 = size.height.into();
+                println!("window resized → width: {:.1}px  height: {:.1}px", w, h);
+            })
+            .detach();
+        }
         let toggle_action = Rc::new(cx.listener(|this, _event: &gpui::ClickEvent, _window, cx| {
             this.sidebar_hidden = !this.sidebar_hidden;
             cx.notify();
@@ -69,6 +84,7 @@ impl Render for MainContent {
                     let new_width = pos.clamp(200.0, 500.0);
                     entity.update(cx, |view, cx| {
                         view.sidebar_width = new_width;
+                        println!("sidebar width: {:.1}px", view.sidebar_width);
                         cx.notify();
                     });
                 },

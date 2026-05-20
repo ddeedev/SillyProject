@@ -124,17 +124,6 @@ impl AppSidebar {
     }
 
     fn favorite_tap(&self) -> impl IntoElement {
-        let gap = 8.0_f32;
-        let available = self.width - 20.0;
-        let cols: u32 = if self.width <= 200.0 {
-            1
-        } else if self.width < 242.0 {
-            2
-        } else {
-            3
-        };
-        let _item_width = px((available - gap * (cols as f32 - 1.0)) / cols as f32);
-
         div()
             .w_full()
             .flex()
@@ -148,8 +137,11 @@ impl AppSidebar {
                 let element_id: gpui::SharedString = format!("grid-item-{}", index).into();
                 div()
                     .id(element_id)
-                    // .w(item_width)
-                    .when(self.width / 3.0 <= 80.0, |el| el.w(gpui::relative(0.48)))
+                    .w_full()
+                    .when(self.width <= 212., |el| el.w_full())
+                    .when(self.width > 212. && self.width <= 242., |el| {
+                        el.w(gpui::relative(0.48))
+                    })
                     .when(self.width / 3.0 > 80.0, |el| el.w(gpui::relative(0.31)))
                     .h(px(60.0))
                     .bg(rgb(0x7A769F))
