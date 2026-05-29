@@ -2,7 +2,7 @@
 mod action;
 mod app;
 mod assets;
-mod component;
+mod components;
 mod platform;
 mod ui;
 mod view;

@@ -3,7 +3,7 @@ use gpui::{App, Context, FocusHandle, Focusable, Window, div, prelude::*, px, rg
 use crate::platform::set_traffic_lights_hidden;
 
 use crate::action::{Quit, ToggleSidebar};
-use crate::component::sidebar::AppSidebar;
+use crate::components::sidebar::AppSidebar;
 
 pub struct MainContent {
     sidebar_hidden: bool,
