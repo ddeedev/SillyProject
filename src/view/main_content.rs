@@ -1,5 +1,4 @@
-use gpui::{App, Context, FocusHandle, Focusable, SharedString, Window, div, prelude::*, px, rgb};
-use std::rc::Rc;
+use gpui::{App, Context, FocusHandle, Focusable, Window, div, prelude::*, px, rgb};
 
 use crate::platform::set_traffic_lights_hidden;
 
@@ -7,23 +6,17 @@ use crate::action::{Quit, ToggleSidebar};
 use crate::component::sidebar::AppSidebar;
 
 pub struct MainContent {
-    text: SharedString,
     sidebar_hidden: bool,
     sidebar_width: f32,
     focus_handle: FocusHandle,
-    bounds_observed: bool,
 }
 
 impl MainContent {
     pub fn new(cx: &mut Context<Self>) -> Self {
-        // NOTE: observe_window_bounds must be called during render when we have
-        // a Window reference, so we log width during the drag-resize handler instead.
         Self {
             sidebar_hidden: false,
             sidebar_width: 242.0,
-            text: "Hello".into(),
             focus_handle: cx.focus_handle(),
-            bounds_observed: true,
         }
     }
 }
@@ -47,22 +40,12 @@ impl Render for MainContent {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         set_traffic_lights_hidden(window, self.sidebar_hidden);
 
-        if !self.bounds_observed {
-            self.bounds_observed = true;
-            cx.observe_window_bounds(window, |_this, window, _cx| {
-                let size = window.viewport_size();
-                let w: f32 = size.width.into();
-                let h: f32 = size.height.into();
-                println!("window resized → width: {:.1}px  height: {:.1}px", w, h);
-            })
-            .detach();
-        }
-        let toggle_action = Rc::new(cx.listener(|this, _event: &gpui::ClickEvent, _window, cx| {
+        let toggle = cx.listener(|this, _: &gpui::ClickEvent, _window, cx| {
             this.sidebar_hidden = !this.sidebar_hidden;
             cx.notify();
-        }));
+        });
 
-        let keybind_action = cx.listener(|this, _event: &ToggleSidebar, _window, cx| {
+        let keybind_toggle = cx.listener(|this, _: &ToggleSidebar, _window, cx| {
             this.sidebar_hidden = !this.sidebar_hidden;
             cx.notify();
         });
@@ -75,8 +58,8 @@ impl Render for MainContent {
             .on_action(|_: &Quit, window, _| {
                 window.remove_window();
             })
-            .on_action(move |event: &ToggleSidebar, _window, cx| {
-                keybind_action(event, _window, cx);
+            .on_action(move |event: &ToggleSidebar, window, cx| {
+                keybind_toggle(event, window, cx);
             })
             .on_drag_move(
                 move |event: &gpui::DragMoveEvent<SidebarResizeDrag>, _window, cx| {
@@ -92,16 +75,12 @@ impl Render for MainContent {
             .flex()
             .flex_row()
             .size_full()
-            // line divider sidebar <> main
             .bg(rgb(0x636080))
             .child(
                 AppSidebar::new(self.sidebar_hidden)
                     .width(self.sidebar_width)
-                    .toggle_sidebar({
-                        let toggle_action = toggle_action.clone();
-                        move |window, cx| {
-                            toggle_action(&gpui::ClickEvent::default(), window, cx);
-                        }
+                    .toggle_sidebar(move |window, cx| {
+                        toggle(&gpui::ClickEvent::default(), window, cx);
                     }),
             )
             .when(!self.sidebar_hidden, |el| {
@@ -123,8 +102,11 @@ impl Render for MainContent {
                     .flex_col()
                     .flex_1()
                     .m_2()
-                    .when(!self.sidebar_hidden, |el| el.ml_0())
-                    .when(self.sidebar_hidden, |el| el.ml_2())
+                    .ml(if self.sidebar_hidden {
+                        px(8.0)
+                    } else {
+                        px(0.0)
+                    })
                     // 2. The styling for the card stroke containe
                     .bg(rgb(0x7A769F))
                     .rounded(px(12.0))
@@ -137,7 +119,6 @@ impl Render for MainContent {
                     .items_center()
                     .text_xl()
                     .text_color(rgb(0xffffff))
-                    .child(format!("Hello, {}!", &self.text))
                     .child(div()),
             )
     }

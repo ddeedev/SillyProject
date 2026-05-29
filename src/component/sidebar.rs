@@ -1,13 +1,10 @@
 use gpui::{App, IntoElement, Window, div, prelude::*, px, rgb, svg};
-use std::rc::Rc;
 
 #[derive(IntoElement)]
 pub struct AppSidebar {
-    // state
     hide: bool,
     width: f32,
-    // event
-    on_toggle: Option<Rc<dyn Fn(&mut Window, &mut App) + 'static>>,
+    on_toggle: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
 }
 
 impl AppSidebar {
@@ -25,16 +22,19 @@ impl AppSidebar {
     }
 
     pub fn toggle_sidebar(mut self, f: impl Fn(&mut Window, &mut App) + 'static) -> Self {
-        self.on_toggle = Some(Rc::new(f));
+        self.on_toggle = Some(Box::new(f));
         self
     }
 }
 
 impl RenderOnce for AppSidebar {
-    fn render(self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
+    fn render(mut self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
         if self.hide {
             return div();
         }
+
+        let on_toggle = self.on_toggle.take();
+        let header = self.render_header_with_toggle(on_toggle);
 
         div()
             .w(px(self.width))
@@ -42,7 +42,7 @@ impl RenderOnce for AppSidebar {
             .bg(rgb(0x636080))
             .flex()
             .flex_col()
-            .child(self.render_header())
+            .child(header)
             .child(
                 div()
                     .flex()
@@ -60,7 +60,10 @@ impl RenderOnce for AppSidebar {
 }
 
 impl AppSidebar {
-    fn render_header(&self) -> impl IntoElement {
+    fn render_header_with_toggle(
+        &self,
+        on_toggle: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
+    ) -> impl IntoElement {
         let mut toggle_btn = div()
             .id("sidebar-toggle")
             .w(px(30.0))
@@ -80,8 +83,7 @@ impl AppSidebar {
                     .opacity(0.5),
             );
 
-        if let Some(on_toggle) = &self.on_toggle {
-            let on_toggle = on_toggle.clone();
+        if let Some(on_toggle) = on_toggle {
             toggle_btn = toggle_btn.on_click(move |_, window, ctx| {
                 on_toggle(window, ctx);
             });
@@ -124,6 +126,17 @@ impl AppSidebar {
     }
 
     fn favorite_tap(&self) -> impl IntoElement {
+        // let gap = 8.0_f32;
+        // let available = self.width - 20.0;
+        // let cols: u32 = if self.width <= 80.0 {
+        //     1
+        // } else if self.width < 240.0 {
+        //     2
+        // } else {
+        //     3
+        // };
+        // let item_width = px((available - gap * (cols as f32 - 1.0)) / cols as f32);
+
         div()
             .w_full()
             .flex()
@@ -151,7 +164,7 @@ impl AppSidebar {
                     .justify_center()
                     .items_center()
                     .hover(|style| style.bg(rgb(0x565375)))
-                    .child(div().opacity(0.5).child(format!("{}", index + 1)))
+                    .child(div().opacity(0.5).child((index + 1).to_string()))
             }))
     }
 
