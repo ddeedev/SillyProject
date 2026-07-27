@@ -1,0 +1,15 @@
+base_url = "https://ddeedev.github.io/SillyProject"
+title = "Silly"
+description = "A GPU-accelerated REST client built with Rust and GPUI."
+compile_sass = true
+minify_html = true
+author = "ddeedev"
+
+[markdown]
+highlight_code = true
+highlight_theme = "one-dark"
+
+[extra]
+github = "https://github.com/ddeedev/SillyProject"
+gpui = "https://www.gpui.rs/"
+version = "0.1.0"

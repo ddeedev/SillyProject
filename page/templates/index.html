@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- ── Hero ───────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="badge">
+      <svg width="8" height="8" viewBox="0 0 10 10" fill="var(--accent)"><circle cx="5" cy="5" r="5"/></svg>
+      Early Development · v{{ config.extra.version }}
+    </div>
+
+    <h1>The REST client that<br/>feels <em>impossibly fast</em></h1>
+
+    <p>
+      Silly is a GPU-accelerated API client built with Rust and GPUI.
+      Lightweight, keyboard-first, and beautifully opinionated.
+    </p>
+
+    <div class="hero-actions">
+      <a href="{{ config.extra.github }}" class="btn btn-primary" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48v-1.7c-2.78.61-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.56 9.56 0 0112 6.8c.85.004 1.7.115 2.5.337 1.9-1.29 2.74-1.02 2.74-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10.01 10.01 0 0022 12c0-5.52-4.48-10-10-10z"/></svg>
+        View on GitHub
+      </a>
+      <a href="#features" class="btn btn-ghost">Explore Features</a>
+    </div>
+
+    <!-- Mock App Window -->
+    <div class="app-preview">
+      <div class="window-bar">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+        <span class="window-title">silly — workspace</span>
+      </div>
+      <div class="app-shell">
+
+        <div class="sidebar">
+          <div class="sidebar-profile">
+            <div class="avatar">S</div>
+            <div>
+              <div class="profile-name">Default</div>
+              <div class="profile-sub">2 collections</div>
+            </div>
+          </div>
+
+          <div class="sidebar-section" style="margin-top:.5rem">Favorites</div>
+          <div class="sidebar-item active" onclick="switchReq(this,'GET','https://api.example.com/users')">
+            <span class="method-pill pill-get">GET</span> List Users
+          </div>
+          <div class="sidebar-item" onclick="switchReq(this,'POST','https://api.example.com/users')">
+            <span class="method-pill pill-post">POST</span> Create User
+          </div>
+          <div class="sidebar-item" onclick="switchReq(this,'PUT','https://api.example.com/users/1')">
+            <span class="method-pill pill-put">PUT</span> Update User
+          </div>
+          <div class="sidebar-item" onclick="switchReq(this,'DELETE','https://api.example.com/users/1')">
+            <span class="method-pill pill-delete">DELETE</span> Delete User
+          </div>
+
+          <div class="sidebar-section" style="margin-top:.75rem">Collections</div>
+          <div class="sidebar-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            Auth APIs
+          </div>
+          <div class="sidebar-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            Products
+          </div>
+        </div>
+
+        <div class="main-area">
+          <div class="request-bar">
+            <select class="method-select" id="methodSel" onchange="updateMethodColor(this.value)">
+              <option>GET</option><option>POST</option>
+              <option>PUT</option><option>DELETE</option><option>PATCH</option>
+            </select>
+            <input class="url-input" id="urlInput" type="text" value="https://api.example.com/users" readonly />
+            <button class="send-btn" onclick="fakeSend(event)">
+              <span id="spinner" class="spinner"></span>
+              Send
+            </button>
+          </div>
+
+          <div class="res-tabs">
+            <div class="res-tab active" onclick="switchTab(this)">Response</div>
+            <div class="res-tab" onclick="switchTab(this)">Headers</div>
+            <div class="res-tab" onclick="switchTab(this)">Body</div>
+            <div class="res-tab" onclick="switchTab(this)">Auth</div>
+          </div>
+
+          <div class="response-area" id="res">
+<span class="json-key">"status"</span>: <span class="json-num">200</span> OK &nbsp;·&nbsp; <span class="json-num">142ms</span><br/><br/>[<br/>
+&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"id"</span>: <span class="json-num">1</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"name"</span>: <span class="json-str">"Alice"</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"email"</span>: <span class="json-str">"alice@example.com"</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"role"</span>: <span class="json-str">"admin"</span><br/>
+&nbsp;&nbsp;},<br/>
+&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"id"</span>: <span class="json-num">2</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"name"</span>: <span class="json-str">"Bob"</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"email"</span>: <span class="json-str">"bob@example.com"</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="json-key">"role"</span>: <span class="json-str">"user"</span><br/>
+&nbsp;&nbsp;}<br/>
+]
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── Features ───────────────────────────────────────────── -->
+<section id="features" class="section-pad">
+  <div class="container">
+    <div class="section-header">
+      <h2>Everything you need, nothing you don't</h2>
+      <p>Built lean, built fast. Silly strips away the bloat so you can focus on your API.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">👤</div>
+        <h3>Multi-Profile</h3>
+        <p>Switch between workspaces instantly with Arc-style profile switching. Each profile keeps its own collections, headers, and env.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>GPU Accelerated</h3>
+        <p>Powered by GPUI — the same rendering engine that drives Zed editor. Renders at 120fps even on huge JSON payloads.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3>Auth Support</h3>
+        <p>Bearer tokens, API keys, Basic Auth — all handled natively. Store credentials per-profile and never paste them again.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📁</div>
+        <h3>Collections & Folders</h3>
+        <p>Organise requests into nested folders. Drag-and-drop reordering with persistent state across sessions.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <h3>Environment Variables</h3>
+        <p>Define variables per profile and reference them with <code style="color:var(--accent2);font-size:.82em">&#123;&#123;variable&#125;&#125;</code> syntax in any field.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📜</div>
+        <h3>Request History</h3>
+        <p>Every request you send is automatically saved. Search, replay, or diff responses from previous runs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── Roadmap ─────────────────────────────────────────────── -->
+<section id="roadmap" class="section-pad">
+  <div class="container">
+    <div class="section-header">
+      <h2>Roadmap</h2>
+      <p>What's done, in progress, and planned for v0.1.0.</p>
+    </div>
+
+    <div class="roadmap-tabs">
+      <button class="rtab active" onclick="filterRoadmap('all',this)">All</button>
+      <button class="rtab" onclick="filterRoadmap('done',this)">Done</button>
+      <button class="rtab" onclick="filterRoadmap('doing',this)">In Progress</button>
+      <button class="rtab" onclick="filterRoadmap('plan',this)">Planned</button>
+    </div>
+
+    <div class="roadmap-wrap">
+      <table>
+        <thead>
+          <tr><th>Task</th><th>Category</th><th>Status</th></tr>
+        </thead>
+        <tbody id="roadmap-body">
+          <tr data-s="done"><td>Sidebar</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Toggle Sidebar</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Title Bar Color</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Drag to Resize Sidebar</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Hide Traffic Light when Sidebar Hidden</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Profile Banner</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Sidebar Icon</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Favorite Tab</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="doing"><td>Folder</td><td>UI</td><td><span class="status-badge s-doing">◑ In Progress</span></td></tr>
+          <tr data-s="plan"><td>Request View</td><td>UI</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Header View</td><td>UI</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Auth View</td><td>UI</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>ENV View</td><td>UI</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Theme per Profile</td><td>UI</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Config</td><td>UI</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>API Request</td><td>Functional</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Multi-Profile</td><td>Functional</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Switching Profile</td><td>Functional</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>History</td><td>Functional</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Cache</td><td>Functional</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── Stack ───────────────────────────────────────────────── -->
+<section id="stack" class="section-pad">
+  <div class="container">
+    <div class="section-header">
+      <h2>Built with</h2>
+      <p>A minimal, high-performance stack with zero compromises.</p>
+    </div>
+    <div class="stack-grid">
+      <div class="stack-card"><div class="emoji">🦀</div><h4>Rust</h4><p>Memory-safe, zero-cost abstractions</p></div>
+      <div class="stack-card"><div class="emoji">⚡</div><h4>GPUI</h4><p>GPU-accelerated UI from Zed</p></div>
+      <div class="stack-card"><div class="emoji">🎨</div><h4>gpui-component</h4><p>Rich component library for GPUI</p></div>
+      <div class="stack-card"><div class="emoji">📦</div><h4>rust-embed</h4><p>Embed assets at compile time</p></div>
+      <div class="stack-card"><div class="emoji">🍎</div><h4>macOS Native</h4><p>Cocoa & raw-window-handle integration</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────────── -->
+<section class="cta">
+  <div class="container">
+    <h2>Join the build 🚀</h2>
+    <p>Silly is open-source and actively developed. Star the repo, open issues, or contribute.</p>
+    <div class="hero-actions">
+      <a href="{{ config.extra.github }}" class="btn btn-primary" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48v-1.7c-2.78.61-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.56 9.56 0 0112 6.8c.85.004 1.7.115 2.5.337 1.9-1.29 2.74-1.02 2.74-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10.01 10.01 0 0022 12c0-5.52-4.48-10-10-10z"/></svg>
+        Star on GitHub
+      </a>
+      <a href="{{ config.extra.gpui }}" class="btn btn-ghost" target="_blank" rel="noopener">Learn GPUI →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  const RESPONSES = {
+    GET:    (ms) => `<span class="json-key">"status"</span>: <span class="json-num">200</span> OK &nbsp;·&nbsp; <span class="json-num">${ms}ms</span><br/><br/>[<br/>&nbsp;&nbsp;{ <span class="json-key">"id"</span>: <span class="json-num">1</span>, <span class="json-key">"name"</span>: <span class="json-str">"Alice"</span> },<br/>&nbsp;&nbsp;{ <span class="json-key">"id"</span>: <span class="json-num">2</span>, <span class="json-key">"name"</span>: <span class="json-str">"Bob"</span> }<br/>]`,
+    POST:   (ms) => `<span class="json-key">"status"</span>: <span class="json-num">201</span> Created &nbsp;·&nbsp; <span class="json-num">${ms}ms</span><br/><br/>{ <span class="json-key">"id"</span>: <span class="json-num">${Math.floor(Math.random()*900+100)}</span>, <span class="json-key">"created"</span>: <span class="json-bool">true</span> }`,
+    PUT:    (ms) => `<span class="json-key">"status"</span>: <span class="json-num">200</span> OK &nbsp;·&nbsp; <span class="json-num">${ms}ms</span><br/><br/>{ <span class="json-key">"updated"</span>: <span class="json-bool">true</span> }`,
+    DELETE: (ms) => `<span class="json-key">"status"</span>: <span class="json-num">204</span> No Content &nbsp;·&nbsp; <span class="json-num">${ms}ms</span><br/><br/><span class="json-str">// Deleted</span>`,
+    PATCH:  (ms) => `<span class="json-key">"status"</span>: <span class="json-num">200</span> OK &nbsp;·&nbsp; <span class="json-num">${ms}ms</span><br/><br/>{ <span class="json-key">"patched"</span>: <span class="json-bool">true</span> }`,
+  };
+  const COLOR = { GET:'var(--green)', POST:'var(--yellow)', PUT:'var(--blue)', DELETE:'var(--red)', PATCH:'var(--accent2)' };
+
+  function switchReq(el, method, url) {
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('urlInput').value = url;
+    const sel = document.getElementById('methodSel');
+    [...sel.options].forEach((o,i) => { if (o.value === method) sel.selectedIndex = i; });
+    updateMethodColor(method);
+    document.getElementById('res').innerHTML = RESPONSES[method]?.(Math.floor(Math.random()*200+40)) ?? '';
+  }
+
+  function updateMethodColor(val) {
+    document.getElementById('methodSel').style.color = COLOR[val] || 'var(--text)';
+  }
+
+  function fakeSend(e) {
+    e.preventDefault();
+    const btn = e.currentTarget;
+    const spinner = document.getElementById('spinner');
+    spinner.style.display = 'inline-block';
+    btn.disabled = true;
+    const method = document.getElementById('methodSel').value;
+    setTimeout(() => {
+      spinner.style.display = 'none';
+      btn.disabled = false;
+      document.getElementById('res').innerHTML = RESPONSES[method]?.(Math.floor(Math.random()*200+40)) ?? '';
+    }, 600);
+  }
+
+  function switchTab(el) {
+    el.closest('.res-tabs').querySelectorAll('.res-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function filterRoadmap(status, btn) {
+    document.querySelectorAll('.rtab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#roadmap-body tr').forEach(row => {
+      row.style.display = (status === 'all' || row.dataset.s === status) ? '' : 'none';
+    });
+  }
+
+  updateMethodColor('GET');
+</script>
+{% endblock %}
