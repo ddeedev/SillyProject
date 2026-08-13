@@ -1,0 +1,53 @@
+name: Website
+
+# Builds the Zola site in page/ and deploys it to GitHub Pages at
+# https://ddeedev.github.io/SillyProject/. Requires: repo Settings → Pages →
+# Source = "GitHub Actions" (one-time setup).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "page/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one Pages deploy at a time, but never cancel an in-progress one:
+# cancelling a live deploy-pages run corrupts the deployment and the next run
+# fails with "Deployment failed, try again later". Queued runs coalesce instead.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Zola
+        run: |
+          curl -sL https://github.com/getzola/zola/releases/download/v0.19.2/zola-v0.19.2-x86_64-unknown-linux-gnu.tar.gz \
+          | tar -xz -C /usr/local/bin
+
+      - name: Build
+        run: zola build
+        working-directory: page
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: page/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
