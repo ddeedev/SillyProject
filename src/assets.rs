@@ -9,13 +9,13 @@ pub struct FontAsset {
 }
 
 pub const FONT_SUPPORT: [FontAsset; 1] = [FontAsset {
-    data: include_bytes!("../assets/font/pacifico/Pacifico-Regular.ttf"),
+    data: include_bytes!("../assets/fonts/pacifico/Pacifico-Regular.ttf"),
     _font_name: "Pacifico",
 }];
 
 #[derive(RustEmbed)]
 #[folder = "./assets"]
-#[include = "icon/*.svg"]
+#[include = "icons/*.svg"]
 pub struct Assets;
 
 impl AssetSource for Assets {

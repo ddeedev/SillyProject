@@ -76,7 +76,7 @@ impl AppSidebar {
             .hover(|style| style.bg(rgb(0x7A769F)))
             .child(
                 svg()
-                    .path("icon/sidebar-left.svg")
+                    .path("icons/sidebar-left.svg")
                     .w(px(18.0))
                     .h(px(16.0))
                     .text_color(rgb(0xF8F8F8))
