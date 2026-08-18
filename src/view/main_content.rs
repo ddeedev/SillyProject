@@ -36,8 +36,9 @@ impl Render for MainContent {
             .on_action(|_: &Quit, window, _| {
                 window.remove_window();
             })
-            .on_action(cx.listener(|this, _: &ToggleSidebar, _window, cx| {
-                this.sidebar.update(cx, |sidebar, cx| sidebar.toggle(cx));
+            .on_action(cx.listener(|this, _: &ToggleSidebar, window, cx| {
+                this.sidebar
+                    .update(cx, |sidebar, cx| sidebar.toggle(window, cx));
             }))
             .flex()
             .flex_row()

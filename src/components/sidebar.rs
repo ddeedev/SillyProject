@@ -1,4 +1,5 @@
 use gpui::{App, IntoElement, Window, deferred, div, prelude::*, px, rgb, svg};
+use objc::msg_send;
 use std::time::Duration;
 
 use crate::platform::set_traffic_lights_hidden;
@@ -28,14 +29,49 @@ impl Sidebar {
         }
     }
 
-    /// 1.0 when fully open, 0.0 when fully hidden (animated).
+    // 1.0 when fully open, 0.0 when fully hidden (animated).
     pub fn visible_fraction(&self) -> f32 {
         self.width_anim / self.width
     }
 
-    pub fn toggle(&mut self, cx: &mut gpui::Context<Self>) {
+    pub fn toggle(&mut self, window: &mut Window, cx: &mut gpui::Context<Self>) {
         let hidden = self.hidden;
-        self.set_hidden(!hidden, cx);
+        let mouse_x: f32 = window.mouse_position().x.into();
+        let swap_to_floating = !hidden && mouse_x <= self.width;
+        let swap_to_docked = hidden && self.floating_visible;
+
+        if swap_to_floating {
+            self.hidden = true;
+            self.width_anim = 0.0;
+            self.show_floating_immediately(cx);
+        } else if swap_to_docked {
+            self.hide_floating_immediately(cx);
+            self.show_docked_immediately(cx);
+        } else {
+            self.set_floating_visible(false, cx);
+            self.set_hidden(!hidden, cx);
+        }
+    }
+
+    // Show the floating sidebar instantly, without the slide-in animation.
+    fn show_floating_immediately(&mut self, cx: &mut gpui::Context<Self>) {
+        self.floating_visible = true;
+        self.floating_progress = 1.0;
+        cx.notify();
+    }
+
+    // Hide the floating sidebar instantly, without the slide-out animation.
+    fn hide_floating_immediately(&mut self, cx: &mut gpui::Context<Self>) {
+        self.floating_visible = false;
+        self.floating_progress = 0.0;
+        cx.notify();
+    }
+
+    // Show the docked sidebar instantly, without the slide-in animation.
+    fn show_docked_immediately(&mut self, cx: &mut gpui::Context<Self>) {
+        self.hidden = false;
+        self.width_anim = self.width;
+        cx.notify();
     }
 
     pub fn set_hidden(&mut self, hidden: bool, cx: &mut gpui::Context<Self>) {
@@ -56,11 +92,11 @@ impl Sidebar {
                 match this.update(cx, |this, cx| {
                     let target = if this.hidden { 0.0 } else { this.width };
                     let diff = target - this.width_anim;
-                    let settled = diff.abs() < 1.0;
+                    let settled = diff.abs() < 3.0;
                     this.width_anim = if settled {
                         target
                     } else {
-                        this.width_anim + diff * 0.3
+                        this.width_anim + diff * 0.65
                     };
                     cx.notify();
                     settled
@@ -92,11 +128,11 @@ impl Sidebar {
                 match this.update(cx, |this, cx| {
                     let target = if this.floating_visible { 1.0 } else { 0.0 };
                     let diff = target - this.floating_progress;
-                    let settled = diff.abs() < 0.02;
+                    let settled = diff.abs() < 0.03;
                     this.floating_progress = if settled {
                         target
                     } else {
-                        this.floating_progress + diff * 0.3
+                        this.floating_progress + diff * 0.5
                     };
                     cx.notify();
                     settled
@@ -127,11 +163,11 @@ impl Render for Sidebar {
             self.width_anim < 1.0 && self.floating_progress <= 0.0,
         );
 
-        let toggle = cx.listener(|this, _: &gpui::ClickEvent, _window, cx| this.toggle(cx));
+        let toggle = cx.listener(|this, _: &gpui::ClickEvent, window, cx| this.toggle(window, cx));
 
         let toggle_floating = cx.listener(|this, _: &gpui::ClickEvent, _window, cx| {
-            this.set_floating_visible(false, cx);
-            this.set_hidden(false, cx);
+            this.hide_floating_immediately(cx);
+            this.show_docked_immediately(cx);
         });
 
         let show_floating = cx.listener(|this, _: &gpui::MouseMoveEvent, _window, cx| {
@@ -268,6 +304,7 @@ impl RenderOnce for AppSidebar {
 
         div()
             .w(px(self.width))
+            .flex_shrink_0()
             .h_full()
             .bg(rgb(0x636080))
             .flex()
@@ -356,17 +393,6 @@ impl AppSidebar {
     }
 
     fn favorite_tap(&self) -> impl IntoElement {
-        // let gap = 8.0_f32;
-        // let available = self.width - 20.0;
-        // let cols: u32 = if self.width <= 80.0 {
-        //     1
-        // } else if self.width < 240.0 {
-        //     2
-        // } else {
-        //     3
-        // };
-        // let item_width = px((available - gap * (cols as f32 - 1.0)) / cols as f32);
-
         div()
             .w_full()
             .flex()
