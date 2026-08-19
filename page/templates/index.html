@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- ── Hero ───────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="badge">
+      <svg width="8" height="8" viewBox="0 0 10 10" fill="var(--accent)"><circle cx="5" cy="5" r="5"/></svg>
+      Early Development · v{{ config.extra.version }}
+    </div>
+
+    <h1>The REST client that<br/>feels <em>impossibly fast</em></h1>
+
+    <p>
+      Silly is a GPU-accelerated API client built with Rust and GPUI.
+      Lightweight, keyboard-first, and beautifully opinionated.
+    </p>
+
+    <div class="hero-actions">
+      <a href="{{ config.extra.github }}" class="btn btn-primary" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48v-1.7c-2.78.61-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.56 9.56 0 0112 6.8c.85.004 1.7.115 2.5.337 1.9-1.29 2.74-1.02 2.74-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10.01 10.01 0 0022 12c0-5.52-4.48-10-10-10z"/></svg>
+        View on GitHub
+      </a>
+      <a href="#features" class="btn btn-ghost">Explore Features</a>
+    </div>
+
+    <!-- App preview — mirrors the real GPUI UI (src/components/sidebar.rs) -->
+    <div class="app-preview">
+      <div class="app-window" id="appWindow">
+
+        <div class="traffic-lights" id="trafficLights">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+        </div>
+
+        <div class="hover-zone" id="hoverZone"></div>
+
+        <div class="sidebar" id="sidebar">
+          <div class="sidebar-topbar">
+            <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar (⌘S)">
+              <svg width="18" height="16" viewBox="0 0 56 56" fill="currentColor"><path d="M 7.7148 49.5742 L 48.2852 49.5742 C 53.1836 49.5742 55.6446 47.1367 55.6446 42.3086 L 55.6446 13.6914 C 55.6446 8.8633 53.1836 6.4258 48.2852 6.4258 L 7.7148 6.4258 C 2.8398 6.4258 .3554 8.8398 .3554 13.6914 L .3554 42.3086 C .3554 47.1602 2.8398 49.5742 7.7148 49.5742 Z M 7.7851 45.8008 C 5.4413 45.8008 4.1288 44.5586 4.1288 42.1211 L 4.1288 13.8789 C 4.1288 11.4414 5.4413 10.1992 7.7851 10.1992 L 18.2148 10.1992 L 18.2148 45.8008 Z M 48.2147 10.1992 C 50.5350 10.1992 51.8708 11.4414 51.8708 13.8789 L 51.8708 42.1211 C 51.8708 44.5586 50.5350 45.8008 48.2147 45.8008 L 21.8944 45.8008 L 21.8944 10.1992 Z M 13.7148 18.8945 C 14.4179 18.8945 15.0507 18.2617 15.0507 17.5820 C 15.0507 16.8789 14.4179 16.2696 13.7148 16.2696 L 8.6757 16.2696 C 7.9726 16.2696 7.3632 16.8789 7.3632 17.5820 C 7.3632 18.2617 7.9726 18.8945 8.6757 18.8945 Z M 13.7148 24.9649 C 14.4179 24.9649 15.0507 24.3320 15.0507 23.6289 C 15.0507 22.9258 14.4179 22.3398 13.7148 22.3398 L 8.6757 22.3398 C 7.9726 22.3398 7.3632 22.9258 7.3632 23.6289 C 7.3632 24.3320 7.9726 24.9649 8.6757 24.9649 Z M 13.7148 31.0118 C 14.4179 31.0118 15.0507 30.4258 15.0507 29.7227 C 15.0507 29.0196 14.4179 28.4102 13.7148 28.4102 L 8.6757 28.4102 C 7.9726 28.4102 7.3632 29.0196 7.3632 29.7227 C 7.3632 30.4258 7.9726 31.0118 8.6757 31.0118 Z"/></svg>
+            </button>
+          </div>
+
+          <div class="sidebar-body">
+            <div class="workspace-card"><span>⭐</span><strong>WorkSpace</strong></div>
+
+            <div class="fav-grid">
+              <div class="fav-item"><span>1</span></div>
+              <div class="fav-item"><span>2</span></div>
+              <div class="fav-item"><span>3</span></div>
+              <div class="fav-item"><span>4</span></div>
+              <div class="fav-item"><span>5</span></div>
+              <div class="fav-item"><span>6</span></div>
+              <div class="fav-item"><span>7</span></div>
+              <div class="fav-item"><span>8</span></div>
+              <div class="fav-item"><span>9</span></div>
+            </div>
+
+            <div class="folder-area"></div>
+            <div class="space-bar"></div>
+          </div>
+        </div>
+
+        <div class="resize-handle" id="resizeHandle" title="Drag to resize (in the app)"></div>
+        <div class="main-card" id="mainCard"></div>
+
+        <div class="floating-sidebar" id="floatingSidebar">
+          <div class="sidebar-topbar">
+            <button class="sidebar-toggle" id="floatingToggle" title="Restore sidebar">
+              <svg width="18" height="16" viewBox="0 0 56 56" fill="currentColor"><path d="M 7.7148 49.5742 L 48.2852 49.5742 C 53.1836 49.5742 55.6446 47.1367 55.6446 42.3086 L 55.6446 13.6914 C 55.6446 8.8633 53.1836 6.4258 48.2852 6.4258 L 7.7148 6.4258 C 2.8398 6.4258 .3554 8.8398 .3554 13.6914 L .3554 42.3086 C .3554 47.1602 2.8398 49.5742 7.7148 49.5742 Z M 7.7851 45.8008 C 5.4413 45.8008 4.1288 44.5586 4.1288 42.1211 L 4.1288 13.8789 C 4.1288 11.4414 5.4413 10.1992 7.7851 10.1992 L 18.2148 10.1992 L 18.2148 45.8008 Z M 48.2147 10.1992 C 50.5350 10.1992 51.8708 11.4414 51.8708 13.8789 L 51.8708 42.1211 C 51.8708 44.5586 50.5350 45.8008 48.2147 45.8008 L 21.8944 45.8008 L 21.8944 10.1992 Z M 13.7148 18.8945 C 14.4179 18.8945 15.0507 18.2617 15.0507 17.5820 C 15.0507 16.8789 14.4179 16.2696 13.7148 16.2696 L 8.6757 16.2696 C 7.9726 16.2696 7.3632 16.8789 7.3632 17.5820 C 7.3632 18.2617 7.9726 18.8945 8.6757 18.8945 Z M 13.7148 24.9649 C 14.4179 24.9649 15.0507 24.3320 15.0507 23.6289 C 15.0507 22.9258 14.4179 22.3398 13.7148 22.3398 L 8.6757 22.3398 C 7.9726 22.3398 7.3632 22.9258 7.3632 23.6289 C 7.3632 24.3320 7.9726 24.9649 8.6757 24.9649 Z M 13.7148 31.0118 C 14.4179 31.0118 15.0507 30.4258 15.0507 29.7227 C 15.0507 29.0196 14.4179 28.4102 13.7148 28.4102 L 8.6757 28.4102 C 7.9726 28.4102 7.3632 29.0196 7.3632 29.7227 C 7.3632 30.4258 7.9726 31.0118 8.6757 31.0118 Z"/></svg>
+            </button>
+          </div>
+          <div class="sidebar-body">
+            <div class="workspace-card"><span>⭐</span><strong>WorkSpace</strong></div>
+
+            <div class="fav-grid">
+              <div class="fav-item"><span>1</span></div>
+              <div class="fav-item"><span>2</span></div>
+              <div class="fav-item"><span>3</span></div>
+              <div class="fav-item"><span>4</span></div>
+              <div class="fav-item"><span>5</span></div>
+              <div class="fav-item"><span>6</span></div>
+              <div class="fav-item"><span>7</span></div>
+              <div class="fav-item"><span>8</span></div>
+              <div class="fav-item"><span>9</span></div>
+            </div>
+
+            <div class="folder-area"></div>
+            <div class="space-bar"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <p class="preview-caption" id="previewCaption">The actual UI — hover the left edge while hidden, click the sidebar icon, or press ⌘S/Ctrl+S.</p>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── Features ───────────────────────────────────────────── -->
+<section id="features" class="section-pad">
+  <div class="container">
+    <div class="section-header">
+      <h2>Everything you need, nothing you don't</h2>
+      <p>Built lean, built fast. Silly strips away the bloat so you can focus on your API.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">👤</div>
+        <h3>Multi-Profile</h3>
+        <p>Switch between workspaces instantly with Arc-style profile switching. Each profile keeps its own collections, headers, and env.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>GPU Accelerated</h3>
+        <p>Powered by GPUI — the same rendering engine that drives Zed editor. Renders at 120fps even on huge JSON payloads.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3>Auth Support</h3>
+        <p>Bearer tokens, API keys, Basic Auth — all handled natively. Store credentials per-profile and never paste them again.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📁</div>
+        <h3>Collections & Folders</h3>
+        <p>Organise requests into nested folders. Drag-and-drop reordering with persistent state across sessions.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <h3>Environment Variables</h3>
+        <p>Define variables per profile and reference them with <code style="color:var(--accent2);font-size:.82em">&#123;&#123;variable&#125;&#125;</code> syntax in any field.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📜</div>
+        <h3>Request History</h3>
+        <p>Every request you send is automatically saved. Search, replay, or diff responses from previous runs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── Roadmap ─────────────────────────────────────────────── -->
+<section id="roadmap" class="section-pad">
+  <div class="container">
+    <div class="section-header">
+      <h2>Roadmap</h2>
+      <p>What's done, in progress, and planned for v0.1.0.</p>
+    </div>
+
+    <div class="roadmap-tabs">
+      <button class="rtab active" onclick="filterRoadmap('all',this)">All</button>
+      <button class="rtab" onclick="filterRoadmap('done',this)">Done</button>
+      <button class="rtab" onclick="filterRoadmap('doing',this)">In Progress</button>
+      <button class="rtab" onclick="filterRoadmap('plan',this)">Planned</button>
+    </div>
+
+    <div class="roadmap-wrap">
+      <table>
+        <thead>
+          <tr><th>Task</th><th>Category</th><th>Status</th></tr>
+        </thead>
+        <tbody id="roadmap-body">
+          <tr data-s="done"><td>Sidebar</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Toggle Sidebar</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Title Bar Color</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Drag to Resize Sidebar</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Hide Traffic Light when Sidebar Hidden</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Profile Banner</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Sidebar Icon</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="done"><td>Favorite Tab</td><td>UI</td><td><span class="status-badge s-done">● Done</span></td></tr>
+          <tr data-s="doing"><td>Folder</td><td>UI</td><td><span class="status-badge s-doing">◑ In Progress</span></td></tr>
+          <tr data-s="plan"><td>Request View</td><td>UI</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Header View</td><td>UI</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Auth View</td><td>UI</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>ENV View</td><td>UI</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Theme per Profile</td><td>UI</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Config</td><td>UI</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>API Request</td><td>Functional</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Multi-Profile</td><td>Functional</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Switching Profile</td><td>Functional</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>History</td><td>Functional</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+          <tr data-s="plan"><td>Cache</td><td>Functional</td><td><span class="status-badge s-plan">○ Planned</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+<!-- ── Stack ───────────────────────────────────────────────── -->
+<section id="stack" class="section-pad">
+  <div class="container">
+    <div class="section-header">
+      <h2>Built with</h2>
+      <p>A minimal, high-performance stack with zero compromises.</p>
+    </div>
+    <div class="stack-grid">
+      <div class="stack-card"><div class="emoji">🦀</div><h4>Rust</h4><p>Memory-safe, zero-cost abstractions</p></div>
+      <div class="stack-card"><div class="emoji">⚡</div><h4>GPUI</h4><p>GPU-accelerated UI from Zed</p></div>
+      <div class="stack-card"><div class="emoji">🎨</div><h4>gpui-component</h4><p>Rich component library for GPUI</p></div>
+      <div class="stack-card"><div class="emoji">📦</div><h4>rust-embed</h4><p>Embed assets at compile time</p></div>
+      <div class="stack-card"><div class="emoji">🍎</div><h4>macOS Native</h4><p>Cocoa & raw-window-handle integration</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────────── -->
+<section class="cta">
+  <div class="container">
+    <h2>Join the build 🚀</h2>
+    <p>Silly is open-source and actively developed. Star the repo, open issues, or contribute.</p>
+    <div class="hero-actions">
+      <a href="{{ config.extra.github }}" class="btn btn-primary" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48v-1.7c-2.78.61-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.56 9.56 0 0112 6.8c.85.004 1.7.115 2.5.337 1.9-1.29 2.74-1.02 2.74-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10.01 10.01 0 0022 12c0-5.52-4.48-10-10-10z"/></svg>
+        Star on GitHub
+      </a>
+      <a href="{{ config.extra.gpui }}" class="btn btn-ghost" target="_blank" rel="noopener">Learn GPUI →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  const sidebar = document.getElementById('sidebar');
+  const floatingSidebar = document.getElementById('floatingSidebar');
+  const trafficLights = document.getElementById('trafficLights');
+  const mainCard = document.getElementById('mainCard');
+  const hoverZone = document.getElementById('hoverZone');
+  const appWindow = document.getElementById('appWindow');
+
+  const state = {
+    hidden: false,
+    width: 242,
+    floatingVisible: false,
+  };
+
+  function updateSidebar() {
+    sidebar.classList.toggle('hidden', state.hidden);
+    sidebar.style.setProperty('--sidebar-width', state.width + 'px');
+
+    const fraction = state.hidden ? 0 : 1;
+    // main card left margin follows visible fraction, matching MainContent::render
+    mainCard.style.marginLeft = (8 * (1 - fraction)) + 'px';
+
+    floatingSidebar.classList.toggle('visible', state.floatingVisible);
+
+    // Traffic lights hidden when docked width is ~0 and no floating sidebar visible.
+    const lightsHidden = state.hidden && !state.floatingVisible;
+    trafficLights.classList.toggle('lights-hidden', lightsHidden);
+
+    // Hover zone only active when docked sidebar is fully hidden.
+    hoverZone.style.display = state.hidden ? 'block' : 'none';
+  }
+
+  function showDocked() {
+    state.hidden = false;
+    state.floatingVisible = false;
+    updateSidebar();
+  }
+
+  function setHidden(hidden) {
+    state.hidden = hidden;
+    if (hidden) state.floatingVisible = false;
+    updateSidebar();
+  }
+
+  function toggleSidebar() {
+    if (state.hidden && state.floatingVisible) {
+      showDocked();
+    } else {
+      setHidden(!state.hidden);
+    }
+  }
+
+  function showFloating() {
+    if (state.hidden) {
+      state.floatingVisible = true;
+      updateSidebar();
+    }
+  }
+
+  function hideFloating() {
+    state.floatingVisible = false;
+    updateSidebar();
+  }
+
+  document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+  document.getElementById('floatingToggle').addEventListener('click', showDocked);
+
+  hoverZone.addEventListener('mouseenter', showFloating);
+  // Hiding the floating sidebar when moving over the main content mirrors MainContent's on_mouse_move.
+  mainCard.addEventListener('mouseenter', hideFloating);
+  floatingSidebar.addEventListener('mouseleave', hideFloating);
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      toggleSidebar();
+    }
+  });
+
+  // Simple drag-to-resize on the handle (clamped 200–500 px).
+  const resizeHandle = document.getElementById('resizeHandle');
+  resizeHandle.addEventListener('mousedown', (startEvent) => {
+    startEvent.preventDefault();
+    const startX = startEvent.clientX;
+    const startWidth = state.width;
+
+    function onMove(moveEvent) {
+      const delta = moveEvent.clientX - startX;
+      let newWidth = Math.max(200, Math.min(500, startWidth + delta));
+      state.width = newWidth;
+      if (!state.hidden) updateSidebar();
+    }
+
+    function onUp() {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    }
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  });
+
+  updateSidebar();
+
+  function filterRoadmap(status, btn) {
+    document.querySelectorAll('.rtab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#roadmap-body tr').forEach(row => {
+      row.style.display = (status === 'all' || row.dataset.s === status) ? '' : 'none';
+    });
+  }
+</script>
+{% endblock %}

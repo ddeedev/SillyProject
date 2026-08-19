@@ -1,21 +1,21 @@
 use anyhow::anyhow;
 use gpui::{App, AssetSource, SharedString};
 use rust_embed::RustEmbed;
-use std::{borrow::Cow, collections::HashMap};
+use std::borrow::Cow;
 
 pub struct FontAsset {
     data: &'static [u8],
-    font_name: &'static str,
+    _font_name: &'static str,
 }
 
 pub const FONT_SUPPORT: [FontAsset; 1] = [FontAsset {
-    data: include_bytes!("../assets/font/pacifico/Pacifico-Regular.ttf"),
-    font_name: "Pacifico",
+    data: include_bytes!("../assets/fonts/pacifico/Pacifico-Regular.ttf"),
+    _font_name: "Pacifico",
 }];
 
 #[derive(RustEmbed)]
 #[folder = "./assets"]
-#[include = "icon/*.svg"]
+#[include = "icons/*.svg"]
 pub struct Assets;
 
 impl AssetSource for Assets {

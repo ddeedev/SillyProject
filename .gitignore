@@ -2,6 +2,7 @@
 # compiled output
 /dist
 /build
+/page/public
 
 # Logs
 logs
@@ -39,3 +40,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 db-data/
 cache-data/
+
+.env.*
+!.env.local
