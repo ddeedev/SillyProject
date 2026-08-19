@@ -34,30 +34,15 @@ impl Sidebar {
         self.width_anim / self.width
     }
 
-    pub fn toggle(&mut self, window: &mut Window, cx: &mut gpui::Context<Self>) {
+    pub fn toggle(&mut self, cx: &mut gpui::Context<Self>) {
         let hidden = self.hidden;
-        let mouse_x: f32 = window.mouse_position().x.into();
-        let swap_to_floating = !hidden && mouse_x <= self.width;
-        let swap_to_docked = hidden && self.floating_visible;
-
-        if swap_to_floating {
-            self.hidden = true;
-            self.width_anim = 0.0;
-            self.show_floating_immediately(cx);
-        } else if swap_to_docked {
+        if hidden && self.floating_visible {
             self.hide_floating_immediately(cx);
             self.show_docked_immediately(cx);
         } else {
             self.set_floating_visible(false, cx);
             self.set_hidden(!hidden, cx);
         }
-    }
-
-    // Show the floating sidebar instantly, without the slide-in animation.
-    fn show_floating_immediately(&mut self, cx: &mut gpui::Context<Self>) {
-        self.floating_visible = true;
-        self.floating_progress = 1.0;
-        cx.notify();
     }
 
     // Hide the floating sidebar instantly, without the slide-out animation.
@@ -163,7 +148,7 @@ impl Render for Sidebar {
             self.width_anim < 1.0 && self.floating_progress <= 0.0,
         );
 
-        let toggle = cx.listener(|this, _: &gpui::ClickEvent, window, cx| this.toggle(window, cx));
+        let toggle = cx.listener(|this, _: &gpui::ClickEvent, _window, cx| this.toggle(cx));
 
         let toggle_floating = cx.listener(|this, _: &gpui::ClickEvent, _window, cx| {
             this.hide_floating_immediately(cx);
