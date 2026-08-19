@@ -1,5 +1,256 @@
-use gpui::{App, IntoElement, Window, div, prelude::*, px, rgb, svg};
+use gpui::{App, IntoElement, Window, deferred, div, prelude::*, px, rgb, svg};
+use objc::msg_send;
+use std::time::Duration;
 
+use crate::platform::set_traffic_lights_hidden;
+
+// Stateful sidebar view. Owns the docked sidebar, the resize handle,
+// the hover hot-zone and the floating sidebar overlay.
+pub struct Sidebar {
+    hidden: bool,
+    width: f32,
+    width_anim: f32,
+    animating: bool,
+    floating_visible: bool,
+    floating_progress: f32,
+    floating_animating: bool,
+}
+
+impl Sidebar {
+    pub fn new(_cx: &mut gpui::Context<Self>) -> Self {
+        Self {
+            hidden: false,
+            width: 242.0,
+            width_anim: 242.0,
+            animating: false,
+            floating_visible: false,
+            floating_progress: 0.0,
+            floating_animating: false,
+        }
+    }
+
+    // 1.0 when fully open, 0.0 when fully hidden (animated).
+    pub fn visible_fraction(&self) -> f32 {
+        self.width_anim / self.width
+    }
+
+    pub fn toggle(&mut self, cx: &mut gpui::Context<Self>) {
+        let hidden = self.hidden;
+        if hidden && self.floating_visible {
+            self.hide_floating_immediately(cx);
+            self.show_docked_immediately(cx);
+        } else {
+            self.set_floating_visible(false, cx);
+            self.set_hidden(!hidden, cx);
+        }
+    }
+
+    // Hide the floating sidebar instantly, without the slide-out animation.
+    fn hide_floating_immediately(&mut self, cx: &mut gpui::Context<Self>) {
+        self.floating_visible = false;
+        self.floating_progress = 0.0;
+        cx.notify();
+    }
+
+    // Show the docked sidebar instantly, without the slide-in animation.
+    fn show_docked_immediately(&mut self, cx: &mut gpui::Context<Self>) {
+        self.hidden = false;
+        self.width_anim = self.width;
+        cx.notify();
+    }
+
+    pub fn set_hidden(&mut self, hidden: bool, cx: &mut gpui::Context<Self>) {
+        if self.hidden == hidden {
+            return;
+        }
+        self.hidden = hidden;
+        cx.notify();
+        if self.animating {
+            return;
+        }
+        self.animating = true;
+        cx.spawn(async move |this, cx| {
+            loop {
+                cx.background_executor()
+                    .timer(Duration::from_millis(16))
+                    .await;
+                match this.update(cx, |this, cx| {
+                    let target = if this.hidden { 0.0 } else { this.width };
+                    let diff = target - this.width_anim;
+                    let settled = diff.abs() < 3.0;
+                    this.width_anim = if settled {
+                        target
+                    } else {
+                        this.width_anim + diff * 0.65
+                    };
+                    cx.notify();
+                    settled
+                }) {
+                    Ok(true) | Err(_) => break,
+                    Ok(false) => {}
+                }
+            }
+            let _ = this.update(cx, |this, _| this.animating = false);
+        })
+        .detach();
+    }
+
+    pub fn set_floating_visible(&mut self, visible: bool, cx: &mut gpui::Context<Self>) {
+        if self.floating_visible == visible {
+            return;
+        }
+        self.floating_visible = visible;
+        cx.notify();
+        if self.floating_animating {
+            return;
+        }
+        self.floating_animating = true;
+        cx.spawn(async move |this, cx| {
+            loop {
+                cx.background_executor()
+                    .timer(Duration::from_millis(16))
+                    .await;
+                match this.update(cx, |this, cx| {
+                    let target = if this.floating_visible { 1.0 } else { 0.0 };
+                    let diff = target - this.floating_progress;
+                    let settled = diff.abs() < 0.03;
+                    this.floating_progress = if settled {
+                        target
+                    } else {
+                        this.floating_progress + diff * 0.5
+                    };
+                    cx.notify();
+                    settled
+                }) {
+                    Ok(true) | Err(_) => break,
+                    Ok(false) => {}
+                }
+            }
+            let _ = this.update(cx, |this, _| this.floating_animating = false);
+        })
+        .detach();
+    }
+}
+
+#[derive(Clone)]
+struct SidebarResizeDrag;
+
+impl Render for SidebarResizeDrag {
+    fn render(&mut self, _window: &mut Window, _cx: &mut gpui::Context<Self>) -> impl IntoElement {
+        div().w(px(4.0)).h_full()
+    }
+}
+
+impl Render for Sidebar {
+    fn render(&mut self, window: &mut Window, cx: &mut gpui::Context<Self>) -> impl IntoElement {
+        set_traffic_lights_hidden(
+            window,
+            self.width_anim < 1.0 && self.floating_progress <= 0.0,
+        );
+
+        let toggle = cx.listener(|this, _: &gpui::ClickEvent, _window, cx| this.toggle(cx));
+
+        let toggle_floating = cx.listener(|this, _: &gpui::ClickEvent, _window, cx| {
+            this.hide_floating_immediately(cx);
+            this.show_docked_immediately(cx);
+        });
+
+        let show_floating = cx.listener(|this, _: &gpui::MouseMoveEvent, _window, cx| {
+            if this.hidden {
+                this.set_floating_visible(true, cx);
+            }
+        });
+
+        let entity = cx.entity();
+
+        div()
+            .h_full()
+            .flex_shrink_0()
+            .flex()
+            .flex_row()
+            .on_drag_move(
+                move |event: &gpui::DragMoveEvent<SidebarResizeDrag>, _window, cx| {
+                    let pos: f32 = event.event.position.x.into();
+                    let new_width = pos.clamp(200.0, 500.0);
+                    entity.update(cx, |view, cx| {
+                        view.width = new_width;
+                        if !view.hidden {
+                            view.width_anim = new_width;
+                        }
+                        cx.notify();
+                    });
+                },
+            )
+            .when(self.width_anim > 0.0, |el| {
+                el.child(
+                    div()
+                        .w(px(self.width_anim))
+                        .h_full()
+                        .flex_shrink_0()
+                        .overflow_hidden()
+                        .flex()
+                        .justify_end()
+                        .child(AppSidebar::new(false).width(self.width).toggle_sidebar(
+                            move |window, cx| {
+                                toggle(&gpui::ClickEvent::default(), window, cx);
+                            },
+                        )),
+                )
+                .child(
+                    div()
+                        .id("sidebar-resize-handle")
+                        .w(px(3.0))
+                        .h_full()
+                        .cursor_col_resize()
+                        .hover(|s| s.bg(rgb(0x827e7e)))
+                        .on_drag(SidebarResizeDrag, |_, _, _, cx| {
+                            cx.new(|_| SidebarResizeDrag)
+                        }),
+                )
+            })
+            .child(deferred(
+                div()
+                    .when(self.hidden && self.width_anim <= 0.0, |el| {
+                        el.child(
+                            div()
+                                .id("sidebar-hover-zone")
+                                .absolute()
+                                .left_0()
+                                .top_0()
+                                .bottom_0()
+                                .w(px(12.0))
+                                .on_mouse_move(show_floating),
+                        )
+                    })
+                    .when(
+                        self.floating_visible || self.floating_progress > 0.0,
+                        |el| {
+                            el.child(
+                                div()
+                                    .id("floating-sidebar")
+                                    .absolute()
+                                    .left(px(-(1.0 - self.floating_progress) * self.width))
+                                    .top_0()
+                                    .bottom_0()
+                                    .occlude()
+                                    .shadow_lg()
+                                    .child(
+                                        AppSidebar::new(false).width(self.width).toggle_sidebar(
+                                            move |window, cx| {
+                                                toggle_floating(
+                                                    &gpui::ClickEvent::default(),
+                                                    window,
+                                                    cx,
+                                                );
+                                            },
+                                        ),
+                                    ),
+                            )
+                        },
+                    ),
+            ))
+    }
+}
 #[derive(IntoElement)]
 pub struct AppSidebar {
     hide: bool,
@@ -38,6 +289,7 @@ impl RenderOnce for AppSidebar {
 
         div()
             .w(px(self.width))
+            .flex_shrink_0()
             .h_full()
             .bg(rgb(0x636080))
             .flex()
@@ -76,7 +328,7 @@ impl AppSidebar {
             .hover(|style| style.bg(rgb(0x7A769F)))
             .child(
                 svg()
-                    .path("icon/sidebar-left.svg")
+                    .path("icons/sidebar-left.svg")
                     .w(px(18.0))
                     .h(px(16.0))
                     .text_color(rgb(0xF8F8F8))
@@ -126,17 +378,6 @@ impl AppSidebar {
     }
 
     fn favorite_tap(&self) -> impl IntoElement {
-        // let gap = 8.0_f32;
-        // let available = self.width - 20.0;
-        // let cols: u32 = if self.width <= 80.0 {
-        //     1
-        // } else if self.width < 240.0 {
-        //     2
-        // } else {
-        //     3
-        // };
-        // let item_width = px((available - gap * (cols as f32 - 1.0)) / cols as f32);
-
         div()
             .w_full()
             .flex()
