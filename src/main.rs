@@ -8,6 +8,7 @@ mod menu;
 mod platform;
 mod ui;
 mod view;
+use settings;
 
 fn main() {
     app::AppRunner::run();

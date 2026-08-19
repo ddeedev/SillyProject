@@ -1,3 +1,5 @@
+use cocoa::appkit::NSWindowButton;
+
 // GPUI did not support hiding traffic ligt ui yet
 #[cfg(target_os = "macos")]
 pub fn set_traffic_lights_hidden(window: &mut gpui::Window, hidden: bool) {
@@ -15,7 +17,6 @@ pub fn set_traffic_lights_hidden(window: &mut gpui::Window, hidden: bool) {
     let ns_view = appkit.ns_view.as_ptr() as cocoa::base::id;
 
     unsafe {
-        use cocoa::appkit::NSWindowButton;
         let ns_window: cocoa::base::id = msg_send![ns_view, window];
         if ns_window.is_null() {
             return;
@@ -32,6 +33,3 @@ pub fn set_traffic_lights_hidden(window: &mut gpui::Window, hidden: bool) {
         }
     }
 }
-
-#[cfg(not(target_os = "macos"))]
-pub fn set_traffic_lights_hidden(_window: &mut gpui::Window, _hidden: bool) {}

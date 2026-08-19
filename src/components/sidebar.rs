@@ -352,6 +352,7 @@ impl AppSidebar {
             .child(toggle_btn)
     }
 
+    // TODO:: add traffic light icon [cross,expand,hyphen]
     fn render_traffic_lights(&self) -> impl IntoElement {
         let light = |id: &'static str, color: u32| {
             div()
