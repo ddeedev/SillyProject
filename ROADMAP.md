@@ -19,8 +19,9 @@
 | Hide Traffic light when sidebar hidden | Done   |
 | Profile banner                         | Done   |
 | Sidebar ICON                           | Done   |
-| Floting Sidebar hover event            | Doing  |
+| Floting Sidebar hover event            | Done   |
 | Favorite Tab                           | Done   |
+| Context Menu                           | Doing  |
 | Folder                                 | Doing  |
 | Request View                           | Plan   |
 | Header View                            | Plan   |

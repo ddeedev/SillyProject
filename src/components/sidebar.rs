@@ -142,10 +142,8 @@ impl Render for SidebarResizeDrag {
 
 impl Render for Sidebar {
     fn render(&mut self, window: &mut Window, cx: &mut gpui::Context<Self>) -> impl IntoElement {
-        set_traffic_lights_hidden(
-            window,
-            self.width_anim < 1.0 && self.floating_progress <= 0.0,
-        );
+        // Native traffic lights are replaced by custom ones inside the sidebar.
+        set_traffic_lights_hidden(window, true);
 
         let toggle = cx.listener(|this, _: &gpui::ClickEvent, _window, cx| this.toggle(cx));
 
@@ -345,12 +343,42 @@ impl AppSidebar {
             .w_full()
             .flex()
             .items_center()
-            .justify_end()
+            .justify_between()
             .pb_2()
             .on_mouse_move(|_, window, _| {
                 window.start_window_move();
             })
+            .child(self.render_traffic_lights())
             .child(toggle_btn)
+    }
+
+    fn render_traffic_lights(&self) -> impl IntoElement {
+        let light = |id: &'static str, color: u32| {
+            div()
+                .id(id)
+                .w(px(12.0))
+                .h(px(12.0))
+                .rounded_full()
+                .bg(rgb(color))
+                .cursor_pointer()
+        };
+
+        div()
+            .flex()
+            .items_center()
+            .gap_2()
+            .pl_3()
+            .child(
+                light("traffic-light-close", 0xFF5F57)
+                    .on_click(|_, window, _| window.remove_window()),
+            )
+            .child(
+                light("traffic-light-minimize", 0xFEBC2E)
+                    .on_click(|_, window, _| window.minimize_window()),
+            )
+            .child(
+                light("traffic-light-zoom", 0x28C840).on_click(|_, window, _| window.zoom_window()),
+            )
     }
 
     fn render_workspace_card(&self) -> impl IntoElement {

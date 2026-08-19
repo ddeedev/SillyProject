@@ -5,12 +5,12 @@ use std::borrow::Cow;
 
 pub struct FontAsset {
     data: &'static [u8],
-    _font_name: &'static str,
+    font_name: &'static str,
 }
 
 pub const FONT_SUPPORT: [FontAsset; 1] = [FontAsset {
     data: include_bytes!("../assets/fonts/pacifico/Pacifico-Regular.ttf"),
-    _font_name: "Pacifico",
+    font_name: "Pacifico",
 }];
 
 #[derive(RustEmbed)]
@@ -36,12 +36,20 @@ impl AssetSource for Assets {
     }
 }
 
-// TODO:: handle duplicate font name
 pub fn load_font_data() -> Vec<Cow<'static, [u8]>> {
-    FONT_SUPPORT
-        .iter()
-        .map(|font| Cow::Borrowed(font.data))
-        .collect()
+    let mut registered = std::collections::HashSet::new();
+    let mut fonts = Vec::with_capacity(FONT_SUPPORT.len());
+    for font in FONT_SUPPORT.iter() {
+        if registered.insert(font.font_name) {
+            fonts.push(Cow::Borrowed(font.data));
+        } else {
+            eprintln!(
+                "duplicate bundled font name \"{}\", skipping",
+                font.font_name
+            );
+        }
+    }
+    fonts
 }
 pub fn load_fonts_asset(cx: &mut App) {
     if let Err(error) = cx.text_system().add_fonts(load_font_data()) {
