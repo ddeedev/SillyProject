@@ -6,6 +6,8 @@ mod components;
 mod platform;
 mod ui;
 mod view;
+mod keybind;
+mod menu;
 
 fn main() {
     app::AppRunner::run();

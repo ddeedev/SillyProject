@@ -1,5 +1,4 @@
 use gpui::{App, IntoElement, Window, deferred, div, prelude::*, px, rgb, svg};
-use objc::msg_send;
 use std::time::Duration;
 
 use crate::platform::set_traffic_lights_hidden;

@@ -1,11 +1,13 @@
-use crate::action::{Quit, ToggleSidebar};
-use crate::assets::{load_fonts_asset, Assets};
+use crate::action::Quit;
+use crate::assets::{Assets, load_fonts_asset};
+use crate::keybind::register_keybind;
+use crate::menu::init_app_menu;
 use crate::view::main_content::MainContent;
 use gpui::{
-    point, prelude::*, px, App, Application, KeyBinding, TitlebarOptions,
-    WindowBackgroundAppearance, WindowKind, WindowOptions,
+    App, Application, TitlebarOptions, WindowBackgroundAppearance, WindowKind, WindowOptions,
+    point, prelude::*, px,
 };
-use gpui_component::{theme, Root};
+use gpui_component::{Root, theme};
 
 pub struct AppRunner;
 
@@ -14,14 +16,11 @@ impl AppRunner {
         Application::new().with_assets(Assets).run(|cx: &mut App| {
             // load asset
             load_fonts_asset(cx);
+            register_keybind(cx);
+            init_app_menu(cx);
 
             theme::init(cx);
             cx.on_action(|_: &Quit, cx| cx.quit());
-            cx.bind_keys([
-                KeyBinding::new("cmd-q", Quit, None),
-                KeyBinding::new("cmd-s", ToggleSidebar, Some("main_view")),
-            ]);
-
             cx.on_window_closed(|cx| {
                 if cx.windows().is_empty() {
                     cx.quit();
