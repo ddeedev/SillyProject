@@ -1,8 +1,8 @@
 use crate::action::Quit;
-use crate::assets::{Assets, load_fonts_asset};
 use crate::keybind::register_keybind;
 use crate::menu::init_app_menu;
 use crate::view::main_content::MainContent;
+use assets::{Assets, load_fonts_asset};
 use gpui::{
     App, Application, TitlebarOptions, WindowBackgroundAppearance, WindowKind, WindowOptions,
     point, prelude::*, px,

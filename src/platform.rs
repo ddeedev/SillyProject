@@ -1,9 +1,6 @@
-use cocoa::appkit::NSWindowButton;
-
-// GPUI did not support hiding traffic ligt ui yet
 #[cfg(target_os = "macos")]
 pub fn set_traffic_lights_hidden(window: &mut gpui::Window, hidden: bool) {
-    use objc::{msg_send, sel, sel_impl};
+    use objc2_app_kit::{NSView, NSWindowButton};
     use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 
     let Ok(raw_handle) = window.window_handle() else {
@@ -13,23 +10,20 @@ pub fn set_traffic_lights_hidden(window: &mut gpui::Window, hidden: bool) {
         return;
     };
 
-    // The raw handle contains ns_view (NSView*); get NSWindow from it
-    let ns_view = appkit.ns_view.as_ptr() as cocoa::base::id;
+    // The raw handle carries the NSView*; borrow it (NOT retained — gpui owns it,
+    // and it outlives this call, so a temporary reference is sound).
+    let ns_view: &NSView = unsafe { &*(appkit.ns_view.as_ptr() as *const NSView) };
+    let Some(ns_window) = ns_view.window() else {
+        return;
+    };
 
-    unsafe {
-        let ns_window: cocoa::base::id = msg_send![ns_view, window];
-        if ns_window.is_null() {
-            return;
-        }
-        for btn in [
-            NSWindowButton::NSWindowCloseButton,
-            NSWindowButton::NSWindowMiniaturizeButton,
-            NSWindowButton::NSWindowZoomButton,
-        ] {
-            let button: cocoa::base::id = msg_send![ns_window, standardWindowButton: btn];
-            if !button.is_null() {
-                let _: () = msg_send![button, setHidden: hidden];
-            }
+    for kind in [
+        NSWindowButton::CloseButton,
+        NSWindowButton::MiniaturizeButton,
+        NSWindowButton::ZoomButton,
+    ] {
+        if let Some(button) = ns_window.standardWindowButton(kind) {
+            button.setHidden(hidden);
         }
     }
 }

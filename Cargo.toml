@@ -3,11 +3,36 @@ name = "silly"
 version = "0.1.0"
 edition = "2024"
 
+[workspace.package]
+publish = false
+edition = "2024"
+
 [workspace]
-members = ["crates/settings"]
+members = [
+  "crates/assets",
+  "crates/path",
+  "crates/paths",
+  "crates/project",
+  "crates/project_panel",
+  "crates/settings",
+]
 
 [dependencies]
+assets.workspace = true
+project_panel.workspace = true
+settings.workspace = true
+anyhow.workspace = true
+gpui.workspace = true
+gpui-component.workspace = true
+rust-embed.workspace = true
+
+[workspace.dependencies]
+assets = { path = "crates/assets" }
+project = { path = "crates/project" }
+project_panel = { path = "crates/project_panel" }
 settings = { path = "crates/settings" }
+path = { path = "crates/path" }
+paths = { path = "crates/paths" }
 anyhow = "1.0.102"
 gpui = "0.2.2"
 gpui-component = "0.5.1"
@@ -15,8 +40,8 @@ rust-embed = "8.11.0"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 raw-window-handle = "0.6"
-objc = "0.2"
-cocoa = "0.25"
+objc2 = "0.6"
+objc2-app-kit = { version = "0.3"}
 
 [profile.dev]
 opt-level = 0
