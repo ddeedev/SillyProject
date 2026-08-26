@@ -1,7 +1,12 @@
 [package]
-name = "path"
+name = "space"
 version = "0.1.0"
 publish.workspace = true
 edition.workspace = true
 
 [dependencies]
+serde.workspace = true
+uuid.workspace = true
+
+[lib]
+path = "src/space.rs"
