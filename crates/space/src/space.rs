@@ -1,8 +1,10 @@
 use crate::node::{Node, NodeId};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use uuid::Uuid;
 
 pub mod node;
+pub mod tab_data;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct SpaceId(pub String);
@@ -10,6 +12,7 @@ pub struct SpaceId(pub String);
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Space {
     pub id: SpaceId,
+    pub profile: ProfileId,
     pub name: String,
     pub favorites: Vec<NodeId>,
     pub pinned: Vec<NodeId>,
@@ -19,6 +22,17 @@ pub struct Space {
     pub nodes: HashMap<NodeId, Node>,
 }
 
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct ProfileId(pub String);
+
+impl ProfileId {
+    pub fn new() -> Self {
+        ProfileId(Uuid::new_v4().to_string())
+    }
+}
+
+impl Default for ProfileId {
+    fn default() -> Self {
+        Self::new()
+    }
 }

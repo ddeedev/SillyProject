@@ -7,6 +7,8 @@ edition.workspace = true
 [dependencies]
 serde.workspace = true
 uuid.workspace = true
+http.workspace = true
+serde_with.workspace = true
 
 [lib]
 path = "src/space.rs"
