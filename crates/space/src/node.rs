@@ -15,7 +15,6 @@ pub enum NodeData {
 pub struct Node {
     pub id: NodeId,
     pub name: String,
-    pub parent: Option<NodeId>,
     pub data: NodeData,
 }
 
@@ -33,7 +32,47 @@ impl Default for NodeId {
 
 pub trait Folder {
     fn has_child(&self) -> bool;
-    fn is_expand(&self) -> bool;
-    fn is_last_node(&self) -> bool;
-    fn is_active(&self) -> bool;
+    fn is_tab(&self) -> bool;
+    fn list_child(&self) -> Vec<NodeId>;
+}
+
+impl Folder for Node {
+    fn is_tab(&self) -> bool {
+        match &self.data {
+            NodeData::Tab { data: _, open: _ } => true,
+            NodeData::Folder {
+                children: _,
+                expand: _,
+            } => false,
+        }
+    }
+
+    fn has_child(&self) -> bool {
+        match &self.data {
+            NodeData::Tab { data: _, open: _ } => false,
+            NodeData::Folder {
+                children: _,
+                expand: _,
+            } => true,
+        }
+    }
+
+    fn list_child(&self) -> Vec<NodeId> {
+        let mut child_node = Vec::new();
+        match !&self.is_tab() {
+            true => match &self.data {
+                NodeData::Folder {
+                    children: child,
+                    expand: _,
+                } => {
+                    child.iter().for_each(|c| {
+                        child_node.push(c.clone().to_owned());
+                    });
+                    child_node
+                }
+                _ => child_node,
+            },
+            false => child_node,
+        }
+    }
 }

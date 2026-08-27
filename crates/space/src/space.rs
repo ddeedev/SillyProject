@@ -17,8 +17,6 @@ pub struct Space {
     pub favorites: Vec<NodeId>,
     pub pinned: Vec<NodeId>,
     pub folder: Vec<NodeId>,
-    pub root_folder: Vec<NodeId>,
-    pub open_folder: HashMap<NodeId, bool>,
     pub nodes: HashMap<NodeId, Node>,
 }
 
