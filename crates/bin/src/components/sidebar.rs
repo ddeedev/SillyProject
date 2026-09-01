@@ -1,11 +1,21 @@
-use gpui::{App, IntoElement, Window, deferred, div, prelude::*, px, rgb, svg};
-use std::time::Duration;
+use gpui::{
+    AnyElement, App, Entity, IntoElement, SharedString, Window, deferred, div, img, prelude::*, px,
+    rgb, svg,
+};
+use serde::de;
+use space::{
+    ProfileContext, SidebarContext,
+    node::{NodeData, NodeId},
+    tab_data::TabData,
+};
+use std::{process::id, sync::Mutex, time::Duration};
 
 use crate::platform::set_traffic_lights_hidden;
 
 // Stateful sidebar view. Owns the docked sidebar, the resize handle,
 // the hover hot-zone and the floating sidebar overlay.
-pub struct Sidebar {
+#[derive(Debug)]
+pub struct SidebarView {
     hidden: bool,
     width: f32,
     width_anim: f32,
@@ -13,10 +23,16 @@ pub struct Sidebar {
     floating_visible: bool,
     floating_progress: f32,
     floating_animating: bool,
+    space_name: SharedString,
+    entity: Entity<SidebarContext>,
 }
 
-impl Sidebar {
-    pub fn new(_cx: &mut gpui::Context<Self>) -> Self {
+impl SidebarView {
+    pub fn new(
+        _cx: &mut gpui::Context<Self>,
+        space_name: SharedString,
+        entity: Entity<SidebarContext>,
+    ) -> Self {
         Self {
             hidden: false,
             width: 242.0,
@@ -25,6 +41,8 @@ impl Sidebar {
             floating_visible: false,
             floating_progress: 0.0,
             floating_animating: false,
+            space_name,
+            entity,
         }
     }
 
@@ -140,9 +158,11 @@ impl Render for SidebarResizeDrag {
     }
 }
 
-impl Render for Sidebar {
+impl Render for SidebarView {
     fn render(&mut self, window: &mut Window, cx: &mut gpui::Context<Self>) -> impl IntoElement {
-        // Native traffic lights are replaced by custom ones inside the sidebar.
+        // NOTE: 1 @ddeedev
+        // 1.1 Disable native traffic light
+        // Then using custom traffic light later
         set_traffic_lights_hidden(window, true);
 
         let toggle = cx.listener(|this, _: &gpui::ClickEvent, _window, cx| this.toggle(cx));
@@ -187,11 +207,13 @@ impl Render for Sidebar {
                         .overflow_hidden()
                         .flex()
                         .justify_end()
-                        .child(AppSidebar::new(false).width(self.width).toggle_sidebar(
-                            move |window, cx| {
-                                toggle(&gpui::ClickEvent::default(), window, cx);
-                            },
-                        )),
+                        .child(
+                            AppSidebar::new(false, self.space_name.clone(), self.entity.clone())
+                                .width(self.width)
+                                .toggle_sidebar(move |window, cx| {
+                                    toggle(&gpui::ClickEvent::default(), window, cx);
+                                }),
+                        ),
                 )
                 .child(
                     div()
@@ -232,7 +254,13 @@ impl Render for Sidebar {
                                     .occlude()
                                     .shadow_lg()
                                     .child(
-                                        AppSidebar::new(false).width(self.width).toggle_sidebar(
+                                        AppSidebar::new(
+                                            false,
+                                            self.space_name.clone(),
+                                            self.entity.clone(),
+                                        )
+                                        .width(self.width)
+                                        .toggle_sidebar(
                                             move |window, cx| {
                                                 toggle_floating(
                                                     &gpui::ClickEvent::default(),
@@ -253,14 +281,18 @@ pub struct AppSidebar {
     hide: bool,
     width: f32,
     on_toggle: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
+    space_name: SharedString,
+    entity: Entity<SidebarContext>,
 }
 
 impl AppSidebar {
-    pub fn new(hide: bool) -> Self {
+    pub fn new(hide: bool, space_name: SharedString, entity: Entity<SidebarContext>) -> Self {
         Self {
             hide,
             width: 240.0,
             on_toggle: None,
+            space_name,
+            entity,
         }
     }
 
@@ -276,13 +308,30 @@ impl AppSidebar {
 }
 
 impl RenderOnce for AppSidebar {
-    fn render(mut self, _window: &mut Window, _cx: &mut App) -> impl IntoElement {
+    fn render(mut self, _window: &mut Window, cx: &mut App) -> impl IntoElement {
         if self.hide {
             return div();
         }
 
         let on_toggle = self.on_toggle.take();
         let header = self.render_header_with_toggle(on_toggle);
+        let space_name: SharedString = self.space_name.to_string().into();
+        let mut fav_tabs: Vec<&TabData> = Vec::new();
+        let space = self.entity.read(cx).clone();
+
+        for item in &space.favorites {
+            let node = space.nodes.get(item);
+            if let Some(node_data) = node
+                && let NodeData::Tab {
+                    data: item,
+                    open: _,
+                } = &node_data.data
+            {
+                fav_tabs.push(item);
+            }
+        }
+
+        let folder = space.folder.clone();
 
         div()
             .w(px(self.width))
@@ -300,19 +349,24 @@ impl RenderOnce for AppSidebar {
                     .m_2()
                     .mr_1()
                     .gap_2()
-                    .child(self.render_workspace_card())
-                    .child(self.favorite_tap())
-                    .child(div().gap_2().flex_1().child(self.folder_request()))
-                    .child(self.space_selection()),
+                    .child(self.render_workspace_card(space_name.as_str()))
+                    .child(self.render_favorite_tap(fav_tabs))
+                    .child(self.render_workspace_card(space_name.as_str()))
+                    .child(
+                        div()
+                            .gap_2()
+                            .flex_1()
+                            .children(folder.clone().iter().map(|f| self.render_node(f, 0, cx))),
+                    )
+                    .child(self.render_space_selection()),
             )
     }
 }
 
+type ToggleHadler = Box<dyn Fn(&mut Window, &mut App) + 'static>;
+
 impl AppSidebar {
-    fn render_header_with_toggle(
-        &self,
-        on_toggle: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
-    ) -> impl IntoElement {
+    fn render_header_with_toggle(&self, on_toggle: Option<ToggleHadler>) -> impl IntoElement {
         let mut toggle_btn = div()
             .id("sidebar-toggle")
             .w(px(30.0))
@@ -348,6 +402,7 @@ impl AppSidebar {
             .on_mouse_move(|_, window, _| {
                 window.start_window_move();
             })
+            // NOTE: 1.2 Enable custom traffic light
             .child(self.render_traffic_lights())
             .child(toggle_btn)
     }
@@ -382,7 +437,7 @@ impl AppSidebar {
             )
     }
 
-    fn render_workspace_card(&self) -> impl IntoElement {
+    fn render_workspace_card(&self, workspace_name: &str) -> impl IntoElement {
         div()
             .flex()
             .flex_row()
@@ -400,12 +455,12 @@ impl AppSidebar {
             .child(div().child("⭐"))
             .child(
                 div()
-                    .child("WorkSpace")
+                    .child(workspace_name.to_string())
                     .font_weight(gpui::FontWeight::EXTRA_BOLD),
             )
     }
 
-    fn favorite_tap(&self) -> impl IntoElement {
+    fn render_favorite_tap(&self, tabs: Vec<&TabData>) -> impl IntoElement {
         div()
             .w_full()
             .flex()
@@ -415,8 +470,13 @@ impl AppSidebar {
             .gap_2()
             .text_xl()
             .text_color(rgb(0xF8F8F8))
-            .children((0..9).map(move |index| {
+            .children(tabs.iter().enumerate().map(|(index, tab)| {
                 let element_id: gpui::SharedString = format!("grid-item-{}", index).into();
+                let icon: &str = match tab {
+                    TabData::Browser(data) => data.favicon.as_str(),
+                    TabData::ApiRequest(data) => data.favicon.as_str(),
+                };
+
                 div()
                     .id(element_id)
                     .w_full()
@@ -425,7 +485,7 @@ impl AppSidebar {
                         el.w(gpui::relative(0.48))
                     })
                     .when(self.width / 3.0 > 80.0, |el| el.w(gpui::relative(0.31)))
-                    .h(px(60.0))
+                    .h(px(45.0))
                     .bg(rgb(0x7A769F))
                     .rounded(px(10.0))
                     .cursor_pointer()
@@ -433,19 +493,192 @@ impl AppSidebar {
                     .justify_center()
                     .items_center()
                     .hover(|style| style.bg(rgb(0x565375)))
-                    .child(div().opacity(0.5).child((index + 1).to_string()))
+                    .child(
+                        svg()
+                            .path(icon.to_string())
+                            .size(px(20.))
+                            .text_color(rgb(0xF8F8F8)),
+                    )
             }))
     }
 
-    fn folder_request(&self) -> impl IntoElement {
-        div().w_full().h_full().bg(rgb(0xffffff))
+    fn render_folder_request(&self) -> impl IntoElement {
+        let expand = true;
+        let name = "Football Live".to_string();
+        div()
+            .w_full()
+            .h(px(40.))
+            .flex()
+            .flex_row()
+            .items_center()
+            .p_2()
+            .gap_2()
+            .rounded(px(10.0))
+            .border_color(rgb(0x565375))
+            .text_base()
+            .hover(|style| style.bg(rgb(0x565375)))
+            .child(
+                div()
+                    .relative()
+                    .w(px(25.0))
+                    .h(px(25.0))
+                    .child(
+                        svg()
+                            .when(!expand, |el| el.path("icons/folder-fill.svg"))
+                            .when(expand, |el| el.path("icons/folder-open-fill.svg"))
+                            .size(px(25.))
+                            .text_color(rgb(0x524C73)),
+                    )
+                    .child(
+                        svg()
+                            .absolute()
+                            .top_0()
+                            .left_0()
+                            .when(!expand, |el| el.path("icons/folder-outline.svg"))
+                            .when(expand, |el| el.path("icons/folder-open-outline.svg"))
+                            .size(px(25.))
+                            .text_color(rgb(0x7A769F)),
+                    ),
+            )
+            .child(
+                div()
+                    .child(name)
+                    .font_weight(gpui::FontWeight::SEMIBOLD)
+                    .text_color(rgb(0xFFFFFF)),
+            )
     }
 
-    fn space_selection(&self) -> impl IntoElement {
+    fn render_space_selection(&self) -> impl IntoElement {
         div()
             .flex_shrink_0()
             .h(px(30.0))
             .bg(rgb(0x7A769F))
             .rounded(px(6.0))
+    }
+
+    fn render_node(&self, id: &NodeId, depths: usize, cx: &mut App) -> AnyElement {
+        let nodes = &self.entity.read(cx).nodes;
+
+        if let Some(node) = nodes.get(id) {
+            let name = node.name.clone();
+            let data = node.data.clone();
+
+            match data {
+                NodeData::Tab { data, open } => self
+                    .render_tab(name.as_str(), &data, open, depths)
+                    .into_any_element(),
+                NodeData::Folder { children, expand } => {
+                    let header = self.render_folder(name.as_str(), expand, depths);
+                    div()
+                        .flex()
+                        .flex_col()
+                        .child(header)
+                        .when(expand, |el| {
+                            el.children(
+                                children.iter().map(|c| self.render_node(c, depths + 1, cx)),
+                            )
+                        })
+                        .into_any_element()
+                }
+            }
+        } else {
+            div().into_any_element()
+        }
+    }
+
+    fn render_tab(
+        &self,
+        name: &str,
+        data: &TabData,
+        open: bool,
+        depths: usize,
+    ) -> impl IntoElement {
+        let padding_px = (depths * 8) as f32;
+        div()
+            .w_full()
+            .h(px(40.))
+            .flex()
+            .flex_row()
+            .items_center()
+            .p(px(padding_px))
+            .gap_2()
+            .rounded(px(10.0))
+            .border_color(rgb(0x565375))
+            .text_base()
+            .hover(|style| style.bg(rgb(0x565375)))
+            .child(
+                div()
+                    .relative()
+                    .w(px(25.0))
+                    .h(px(25.0))
+                    .child(
+                        svg()
+                            .when(!open, |el| el.path("icons/folder-fill.svg"))
+                            .when(open, |el| el.path("icons/folder-open-fill.svg"))
+                            .size(px(25.))
+                            .text_color(rgb(0x524C73)),
+                    )
+                    .child(
+                        svg()
+                            .absolute()
+                            .top_0()
+                            .left_0()
+                            .when(!open, |el| el.path("icons/folder-outline.svg"))
+                            .when(open, |el| el.path("icons/folder-open-outline.svg"))
+                            .size(px(25.))
+                            .text_color(rgb(0x7A769F)),
+                    ),
+            )
+            .child(
+                div()
+                    .child(name.to_string())
+                    .font_weight(gpui::FontWeight::SEMIBOLD)
+                    .text_color(rgb(0xFFFFFF)),
+            )
+    }
+
+    fn render_folder(&self, name: &str, expand: bool, depths: usize) -> impl IntoElement {
+        let padding_px = (depths * 8) as f32;
+        div()
+            .w_full()
+            .h(px(40.))
+            .flex()
+            .flex_row()
+            .items_center()
+            .p(px(padding_px))
+            .gap_2()
+            .rounded(px(10.0))
+            .border_color(rgb(0x565375))
+            .text_base()
+            .hover(|style| style.bg(rgb(0x565375)))
+            .child(
+                div()
+                    .relative()
+                    .w(px(25.0))
+                    .h(px(25.0))
+                    .child(
+                        svg()
+                            .when(!expand, |el| el.path("icons/folder-fill.svg"))
+                            .when(expand, |el| el.path("icons/folder-open-fill.svg"))
+                            .size(px(25.))
+                            .text_color(rgb(0x524C73)),
+                    )
+                    .child(
+                        svg()
+                            .absolute()
+                            .top_0()
+                            .left_0()
+                            .when(!expand, |el| el.path("icons/folder-outline.svg"))
+                            .when(expand, |el| el.path("icons/folder-open-outline.svg"))
+                            .size(px(25.))
+                            .text_color(rgb(0x7A769F)),
+                    ),
+            )
+            .child(
+                div()
+                    .child(name.to_string())
+                    .font_weight(gpui::FontWeight::SEMIBOLD)
+                    .text_color(rgb(0xFFFFFF)),
+            )
     }
 }

@@ -1,0 +1,43 @@
+[space]
+id = "98153885-5687-417e-be49-4ddf63521eff"
+name = "space1"
+number = 1
+
+[space.profile]
+id = "8dabe0e2-3c4c-4e9c-b7b1-c22056e50404"
+pseudonym = "myprofile"
+email = "myprofile@example.com"
+
+[space.sidebar]
+folder = [
+  'e244853c-56f7-4376-bd44-fafb096a4b3f',
+  '862dfc95-d75c-4d14-ae17-3d855a6bfd12',
+  '98d6f6d2-abca-4f31-8c2a-2e3db880cb78',
+]
+favorites = [
+  '3da61339-2f86-4985-a338-e78be8c9ee5b',
+  'ffe19229-4775-484c-b0b3-68ef5d62f3a1',
+  '123057a5-8ef8-4b07-922a-d04abec8cf2c',
+]
+pinned = [
+  '8e932901-1dc3-4456-ada5-e76e28516e30',
+  'f7f9a65b-91e4-45fb-817e-565e596c3586',
+  '264b75f2-dcdc-4f59-a289-a7d74a8961fb',
+]
+
+[space.sidebar.nodes]
+# folder
+'e244853c-56f7-4376-bd44-fafb096a4b3f' = { id = 'e244853c-56f7-4376-bd44-fafb096a4b3f', name = 'folder1', data = { Folder = { children = [
+], expand = true } }, position = 1 }
+'862dfc95-d75c-4d14-ae17-3d855a6bfd12' = { id = '862dfc95-d75c-4d14-ae17-3d855a6bfd12', name = 'folder2', data = { Folder = { children = [
+], expand = false } }, position = 2 }
+'98d6f6d2-abca-4f31-8c2a-2e3db880cb78' = { id = '98d6f6d2-abca-4f31-8c2a-2e3db880cb78', name = 'folder3', data = { Folder = { children = [
+], expand = false } }, position = 3 }
+# favorites
+'3da61339-2f86-4985-a338-e78be8c9ee5b' = { id = '3da61339-2f86-4985-a338-e78be8c9ee5b', name = 'favorites1', data = { Tab = { data = { type = 'ApiRequest', url = 'https://example.com/favorites1', favicon = '', tab_number = 1 }, open = true } }, position = 1 }
+'ffe19229-4775-484c-b0b3-68ef5d62f3a1' = { id = 'ffe19229-4775-484c-b0b3-68ef5d62f3a1', name = 'favorites2', data = { Tab = { data = { type = 'ApiRequest', url = 'https://example.com/favorites2', favicon = '', tab_number = 2 }, open = false } }, position = 2 }
+'123057a5-8ef8-4b07-922a-d04abec8cf2c' = { id = '123057a5-8ef8-4b07-922a-d04abec8cf2c', name = 'favorites3', data = { Tab = { data = { type = 'ApiRequest', url = 'https://example.com/favorites3', favicon = '', tab_number = 3 }, open = false } }, position = 3 }
+# pinned
+'8e932901-1dc3-4456-ada5-e76e28516e30' = { id = '8e932901-1dc3-4456-ada5-e76e28516e30', name = 'pinned1', data = { Tab = { data = { type = 'ApiRequest', url = 'https://api.example.com/users', favicon = '', tab_number = 1, method = 'GET', params = {}, body = '', authorization = '', headers = {} }, open = true } }, position = 1 }
+'f7f9a65b-91e4-45fb-817e-565e596c3586' = { id = 'f7f9a65b-91e4-45fb-817e-565e596c3586', name = 'pinned2', data = { Tab = { data = { type = 'ApiRequest', url = 'https://api.example.com/users', favicon = '', tab_number = 2, method = 'POST', params = {}, body = '{}', authorization = '', headers = {} }, open = false } }, position = 2 }
+'264b75f2-dcdc-4f59-a289-a7d74a8961fb' = { id = '264b75f2-dcdc-4f59-a289-a7d74a8961fb', name = 'pinned3', data = { Tab = { data = { type = 'ApiRequest', url = 'https://api.example.com/users/1', favicon = '', tab_number = 3, method = 'DELETE', params = {}, body = '', authorization = '', headers = {} }, open = false } }, position = 3 }

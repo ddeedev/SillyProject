@@ -16,6 +16,7 @@ pub const FONT_SUPPORT: [FontAsset; 1] = [FontAsset {
 #[derive(RustEmbed)]
 #[folder = "../../assets"]
 #[include = "icons/*.svg"]
+#[include = "mock/**/*.md"]
 pub struct Assets;
 
 impl AssetSource for Assets {
@@ -51,6 +52,7 @@ pub fn load_font_data() -> Vec<Cow<'static, [u8]>> {
     }
     fonts
 }
+
 pub fn load_fonts_asset(cx: &mut App) {
     if let Err(error) = cx.text_system().add_fonts(load_font_data()) {
         eprintln!("failed to register bundled UI fonts, falling back to system fonts: {error}");

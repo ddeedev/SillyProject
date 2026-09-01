@@ -43,3 +43,5 @@ cache-data/
 
 .env.*
 !.env.local
+
+personal/

@@ -3,24 +3,11 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct NodeId(String);
+pub struct NodeId(pub String);
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum NodeData {
-    Folder { children: Vec<NodeId>, expand: bool },
-    Tab { data: TabData, open: bool },
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Node {
-    pub id: NodeId,
-    pub name: String,
-    pub data: NodeData,
-}
-
-impl NodeId {
-    pub fn new() -> Self {
-        NodeId(Uuid::new_v4().to_string())
+impl std::fmt::Display for NodeId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
     }
 }
 
@@ -30,24 +17,55 @@ impl Default for NodeId {
     }
 }
 
-pub trait Folder {
-    fn has_child(&self) -> bool;
-    fn is_tab(&self) -> bool;
-    fn list_child(&self) -> Vec<NodeId>;
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum NodeData {
+    Folder { children: Vec<NodeId>, expand: bool },
+    Tab { data: TabData, open: bool },
 }
 
-impl Folder for Node {
-    fn is_tab(&self) -> bool {
-        match &self.data {
-            NodeData::Tab { data: _, open: _ } => true,
-            NodeData::Folder {
-                children: _,
-                expand: _,
-            } => false,
+impl NodeData {
+    pub fn new_tab_node(data: TabData, open: bool) -> Self {
+        Self::Tab { data, open }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Node {
+    pub id: NodeId,
+    pub name: String,
+    pub data: NodeData,
+    // arrange location;
+    pub position: u8,
+}
+
+impl Node {
+    pub fn new(name: String, data: NodeData, position: u8) -> Self {
+        Self {
+            id: NodeId::default(),
+            name,
+            data,
+            position,
         }
     }
 
-    fn has_child(&self) -> bool {
+    pub fn next_position(&self) -> u8 {
+        (self.list_child_folder().len() + 1) as u8
+    }
+}
+
+impl NodeId {
+    pub fn new() -> Self {
+        NodeId(Uuid::new_v4().to_string())
+    }
+}
+
+pub trait Folder {
+    fn has_child_folder(&self) -> bool;
+    fn list_child_folder(&self) -> Vec<NodeId>;
+}
+
+impl Folder for Node {
+    fn has_child_folder(&self) -> bool {
         match &self.data {
             NodeData::Tab { data: _, open: _ } => false,
             NodeData::Folder {
@@ -57,22 +75,10 @@ impl Folder for Node {
         }
     }
 
-    fn list_child(&self) -> Vec<NodeId> {
-        let mut child_node = Vec::new();
-        match !&self.is_tab() {
-            true => match &self.data {
-                NodeData::Folder {
-                    children: child,
-                    expand: _,
-                } => {
-                    child.iter().for_each(|c| {
-                        child_node.push(c.clone().to_owned());
-                    });
-                    child_node
-                }
-                _ => child_node,
-            },
-            false => child_node,
+    fn list_child_folder(&self) -> Vec<NodeId> {
+        match &self.data {
+            NodeData::Folder { children, .. } => children.clone(),
+            NodeData::Tab { .. } => Vec::new(),
         }
     }
 }

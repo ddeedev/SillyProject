@@ -41,8 +41,8 @@ impl AppRunner {
             };
 
             cx.open_window(window_option, |window, cx| {
-                let main_conten = cx.new(MainContent::new);
-                cx.new(|cx| Root::new(main_conten, window, cx))
+                let main_content = cx.new(MainContent::new);
+                cx.new(|cx| Root::new(main_content, window, cx))
             })
             .unwrap();
             cx.activate(true);

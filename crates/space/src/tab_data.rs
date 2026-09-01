@@ -13,6 +13,7 @@ pub enum TabData {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BrowserData {
     pub url: String,
+    pub tab_number: Option<u8>,
     pub favicon: String,
 }
 
@@ -20,10 +21,42 @@ pub struct BrowserData {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ApiRequestData {
     pub url: String,
+    pub tab_number: Option<u8>,
+    // for api request favicon will ba base on its method
+    pub favicon: String,
     #[serde_as(as = "DisplayFromStr")]
     pub method: Method,
     pub params: HashMap<String, String>,
     pub body: String,
     pub authorization: String,
     pub headers: HashMap<String, String>,
+}
+
+impl BrowserData {
+    pub fn new(url: String, favicon: String) -> Self {
+        Self {
+            url,
+            favicon,
+            tab_number: None,
+        }
+    }
+}
+
+impl TabData {
+    pub fn new_tab(url: String, favicon: String) -> Self {
+        Self::Browser(BrowserData::new(url, favicon))
+    }
+
+    pub fn new_request(url: String, method: String) -> Self {
+        Self::ApiRequest(ApiRequestData {
+            url,
+            tab_number: todo!(),
+            favicon: todo!(),
+            method: todo!(),
+            params: todo!(),
+            body: todo!(),
+            authorization: todo!(),
+            headers: todo!(),
+        })
+    }
 }
