@@ -593,14 +593,15 @@ impl AppSidebar {
         open: bool,
         depths: usize,
     ) -> impl IntoElement {
-        let padding_px = (depths * 8) as f32;
+        let indent_px = 8.0 + (depths as f32 * 12.0);
         div()
             .w_full()
             .h(px(40.))
             .flex()
             .flex_row()
             .items_center()
-            .p(px(padding_px))
+            .p_2()
+            .pl(px(indent_px))
             .gap_2()
             .rounded(px(10.0))
             .border_color(rgb(0x565375))
@@ -638,14 +639,15 @@ impl AppSidebar {
     }
 
     fn render_folder(&self, name: &str, expand: bool, depths: usize) -> impl IntoElement {
-        let padding_px = (depths * 8) as f32;
+        let indent_px = 8.0 + (depths as f32 * 12.0);
         div()
             .w_full()
             .h(px(40.))
             .flex()
             .flex_row()
             .items_center()
-            .p(px(padding_px))
+            .p_2()
+            .pl(px(indent_px))
             .gap_2()
             .rounded(px(10.0))
             .border_color(rgb(0x565375))
