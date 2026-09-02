@@ -5478,6 +5478,7 @@ dependencies = [
  "assets",
  "gpui",
  "gpui-component",
+ "http",
  "objc2",
  "objc2-app-kit",
  "raw-window-handle",

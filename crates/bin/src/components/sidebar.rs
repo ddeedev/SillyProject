@@ -2,6 +2,7 @@ use gpui::{
     AnyElement, App, Entity, IntoElement, SharedString, Window, deferred, div, img, prelude::*, px,
     rgb, svg,
 };
+use http::Method;
 use serde::de;
 use space::{
     ProfileContext, SidebarContext,
@@ -472,9 +473,19 @@ impl AppSidebar {
             .text_color(rgb(0xF8F8F8))
             .children(tabs.iter().enumerate().map(|(index, tab)| {
                 let element_id: gpui::SharedString = format!("grid-item-{}", index).into();
-                let icon: &str = match tab {
-                    TabData::Browser(data) => data.favicon.as_str(),
-                    TabData::ApiRequest(data) => data.favicon.as_str(),
+                let (icon, icon_color): (&str, u32) = match tab {
+                    TabData::Browser(data) => (data.favicon.as_str(), 0xF8F8F8),
+                    TabData::ApiRequest(data) => {
+                        let color = match data.method {
+                            Method::GET => 0x4ADE80,
+                            Method::POST => 0xFACC15,
+                            Method::PUT => 0x60A5FA,
+                            Method::PATCH => 0xC084FC,
+                            Method::DELETE => 0xF87171,
+                            _ => 0xF8F8F8,
+                        };
+                        (data.favicon.as_str(), color)
+                    }
                 };
 
                 div()
@@ -497,7 +508,7 @@ impl AppSidebar {
                         svg()
                             .path(icon.to_string())
                             .size(px(20.))
-                            .text_color(rgb(0xF8F8F8)),
+                            .text_color(rgb(icon_color)),
                     )
             }))
     }
@@ -608,27 +619,13 @@ impl AppSidebar {
             .text_base()
             .hover(|style| style.bg(rgb(0x565375)))
             .child(
-                div()
-                    .relative()
-                    .w(px(25.0))
-                    .h(px(25.0))
-                    .child(
-                        svg()
-                            .when(!open, |el| el.path("icons/folder-fill.svg"))
-                            .when(open, |el| el.path("icons/folder-open-fill.svg"))
-                            .size(px(25.))
-                            .text_color(rgb(0x524C73)),
-                    )
-                    .child(
-                        svg()
-                            .absolute()
-                            .top_0()
-                            .left_0()
-                            .when(!open, |el| el.path("icons/folder-outline.svg"))
-                            .when(open, |el| el.path("icons/folder-open-outline.svg"))
-                            .size(px(25.))
-                            .text_color(rgb(0x7A769F)),
-                    ),
+                div().relative().w(px(25.0)).h(px(25.0)).child(
+                    svg()
+                        .when(!open, |el| el.path("icons/method-get.svg"))
+                        .when(open, |el| el.path("icons/method-get.svg"))
+                        .size(px(25.))
+                        .text_color(rgb(0x524C73)),
+                ),
             )
             .child(
                 div()

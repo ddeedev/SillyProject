@@ -3,8 +3,9 @@ use std::collections::HashMap;
 use gpui::{
     App, Context, Entity, FocusHandle, Focusable, SharedString, Window, div, prelude::*, px, rgb,
 };
+use http::Method;
 use space::node::{Node, NodeData, NodeId};
-use space::tab_data::TabData;
+use space::tab_data::{ApiRequestData, TabData};
 
 use crate::action::{Quit, ToggleSidebar};
 use crate::components::sidebar::SidebarView;
@@ -59,10 +60,39 @@ impl MainContent {
                 position: 2,
             }
         };
+        let tab3_node_id = NodeId::default();
+        let fav_tab3 = {
+            let id = tab3_node_id.to_string();
+            let name = "fav3".to_string();
+            let data = NodeData::Tab {
+                data: TabData::ApiRequest(ApiRequestData {
+                    url: "localhost/api/users".to_string(),
+                    tab_number: None,
+                    favicon: "icons/sidebar-left.svg".to_string(),
+                    method: Method::GET,
+                    params: HashMap::from([("page".to_string(), "1".to_string())]),
+                    body: String::new(),
+                    authorization: String::new(),
+                    headers: HashMap::from([("Accept".to_string(), "application/json".to_string())]),
+                }),
+                open: true,
+            };
+            Node {
+                id: NodeId(id),
+                name,
+                data,
+                position: 3,
+            }
+        };
         let mut nodes: HashMap<NodeId, Node> = HashMap::new();
-        let fav_tab = vec![tab1_node_id.clone(), tab2_node_id.clone()];
+        let fav_tab = vec![
+            tab1_node_id.clone(),
+            tab2_node_id.clone(),
+            tab3_node_id.clone(),
+        ];
         nodes.insert(tab1_node_id, fav_tab1);
         nodes.insert(tab2_node_id, fav_tab2);
+        nodes.insert(tab3_node_id, fav_tab3);
 
         // folder mock: folder1 (expanded, 2 tabs), folder2 (collapsed, 1 tab)
         let folder1_node_id = NodeId::default();
@@ -95,6 +125,28 @@ impl MainContent {
             },
             position: 2,
         };
+        let folder1_tab3_id = NodeId::default();
+        let folder1_tab3 = Node {
+            id: folder1_tab3_id.clone(),
+            name: "create_user".to_string(),
+            data: NodeData::Tab {
+                data: TabData::ApiRequest(ApiRequestData {
+                    url: "localhost/api/users".to_string(),
+                    tab_number: None,
+                    favicon: "icons/sidebar-left.svg".to_string(),
+                    method: Method::POST,
+                    params: HashMap::new(),
+                    body: r#"{"name": "mock_user"}"#.to_string(),
+                    authorization: "Bearer mock-token".to_string(),
+                    headers: HashMap::from([(
+                        "Content-Type".to_string(),
+                        "application/json".to_string(),
+                    )]),
+                }),
+                open: false,
+            },
+            position: 3,
+        };
         let folder2_tab1 = Node {
             id: folder2_tab1_id.clone(),
             name: "request3".to_string(),
@@ -111,7 +163,11 @@ impl MainContent {
             id: folder1_node_id.clone(),
             name: "folder1".to_string(),
             data: NodeData::Folder {
-                children: vec![folder1_tab1_id.clone(), folder1_tab2_id.clone()],
+                children: vec![
+                    folder1_tab1_id.clone(),
+                    folder1_tab2_id.clone(),
+                    folder1_tab3_id.clone(),
+                ],
                 expand: true,
             },
             position: 1,
@@ -129,6 +185,7 @@ impl MainContent {
         let folder_list = vec![folder1_node_id.clone(), folder2_node_id.clone()];
         nodes.insert(folder1_tab1_id, folder1_tab1);
         nodes.insert(folder1_tab2_id, folder1_tab2);
+        nodes.insert(folder1_tab3_id, folder1_tab3);
         nodes.insert(folder2_tab1_id, folder2_tab1);
         nodes.insert(folder1_node_id, folder1);
         nodes.insert(folder2_node_id, folder2);
