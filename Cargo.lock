@@ -1010,6 +1010,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "context"
+version = "0.1.0"
+dependencies = [
+ "http",
+ "serde",
+ "serde_with",
+ "thiserror 2.0.20",
+ "toml 1.1.4+spec-1.1.0",
+ "uuid",
+]
+
+[[package]]
 name = "convert_case"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5476,16 +5488,14 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "assets",
+ "context",
  "gpui",
  "gpui-component",
  "http",
- "objc2",
- "objc2-app-kit",
- "raw-window-handle",
  "rust-embed",
  "serde",
  "settings",
- "space",
+ "ui",
 ]
 
 [[package]]
@@ -5580,18 +5590,6 @@ checksum = "3a766e1110788c36f4fa1c2b71b387a7815aa65f88ce0229841826633d93723e"
 dependencies = [
  "libc",
  "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "space"
-version = "0.1.0"
-dependencies = [
- "http",
- "serde",
- "serde_with",
- "thiserror 2.0.20",
- "toml 1.1.4+spec-1.1.0",
- "uuid",
 ]
 
 [[package]]
@@ -6456,6 +6454,19 @@ dependencies = [
  "memoffset",
  "tempfile",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "ui"
+version = "0.1.0"
+dependencies = [
+ "context",
+ "gpui",
+ "gpui-component",
+ "http",
+ "objc2",
+ "objc2-app-kit",
+ "raw-window-handle",
 ]
 
 [[package]]

@@ -3,10 +3,10 @@ use gpui::{
     rgb, svg,
 };
 use http::Method;
-use serde::de;
-use space::{
-    ProfileContext, SidebarContext,
+use context::{
     node::{NodeData, NodeId},
+    space::ProfileContext,
+    space::SidebarContext,
     tab_data::TabData,
 };
 use std::{process::id, sync::Mutex, time::Duration};

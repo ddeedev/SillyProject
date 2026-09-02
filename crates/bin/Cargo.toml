@@ -12,13 +12,7 @@ gpui.workspace = true
 gpui-component.workspace = true
 http.workspace = true
 rust-embed.workspace = true
-space.workspace = true
+context.workspace = true
 serde.workspace = true
+ui.workspace = true
 
-[target.'cfg(target_os = "macos")'.dependencies]
-raw-window-handle = "0.6"
-objc2 = "0.6"
-objc2-app-kit = { version = "0.3" }
-#raw-window-handle.workspace = true
-#objc2.workspace = true
-#objc2-app-kit.workspace = true

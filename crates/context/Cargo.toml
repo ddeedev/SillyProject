@@ -1,5 +1,5 @@
 [package]
-name = "space"
+name = "context"
 version = "0.1.0"
 publish.workspace = true
 edition.workspace = true
@@ -13,4 +13,4 @@ thiserror.workspace = true
 toml.workspace = true
 
 [lib]
-path = "src/space.rs"
+path = "src/context.rs"

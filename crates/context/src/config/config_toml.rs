@@ -1,6 +1,6 @@
-use crate::SpaceContext;
 use serde::de::DeserializeOwned;
 use std::path::Path;
+use crate::space::SpaceContext;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ConfigError {

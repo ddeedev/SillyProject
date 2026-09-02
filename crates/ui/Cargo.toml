@@ -1,0 +1,22 @@
+[package]
+name = "ui"
+version = "0.1.0"
+publish.workspace = true
+edition.workspace = true
+
+[lib]
+path = "src/ui.rs"
+
+[dependencies]
+gpui.workspace = true
+gpui-component.workspace = true
+context.workspace = true
+http.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+raw-window-handle = "0.6"
+objc2 = "0.6"
+objc2-app-kit = { version = "0.3" }
+#raw-window-handle.workspace = true
+#objc2.workspace = true
+#objc2-app-kit.workspace = true

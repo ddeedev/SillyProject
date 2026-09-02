@@ -2,7 +2,13 @@
 [workspace]
 default-members = ["crates/bin"]
 resolver = "2"
-members = ["crates/assets", "crates/bin", "crates/settings", "crates/space"]
+members = [
+  "crates/assets",
+  "crates/bin",
+  "crates/settings",
+  "crates/context",
+  "crates/ui",
+]
 
 [workspace.package]
 publish = false
@@ -10,7 +16,7 @@ edition = "2024"
 
 [workspace.dependencies]
 assets = { path = "crates/assets" }
-space = { path = "crates/space" }
+context = { path = "crates/context" }
 settings = { path = "crates/settings" }
 anyhow = "1.0.102"
 gpui = "0.2.2"
@@ -22,6 +28,7 @@ http = "1.5.0"
 serde_with = "3.22.0"
 toml = "1.1.4"
 thiserror = "2.0.20"
+ui = { path = "crates/ui" }
 # NOTE: target_os no need to install at root
 # raw-window-handle = "0.6"
 # objc2 = "0.6"
