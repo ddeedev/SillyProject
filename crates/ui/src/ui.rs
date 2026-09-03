@@ -1,2 +1,2 @@
-pub mod sidebar;
 pub mod platform;
+pub mod sidebar;

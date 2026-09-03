@@ -1,13 +1,13 @@
-use gpui::{
-    AnyElement, App, Entity, IntoElement, SharedString, Window, deferred, div, prelude::*, px, rgb,
-    svg,
-};
-use http::Method;
 use context::{
     node::{NodeData, NodeId},
     space::SidebarContext,
     tab_data::TabData,
 };
+use gpui::{
+    AnyElement, App, Entity, IntoElement, SharedString, Window, deferred, div, prelude::*, px, rgb,
+    svg,
+};
+use http::Method;
 use std::time::Duration;
 
 use crate::platform::set_traffic_lights_hidden;

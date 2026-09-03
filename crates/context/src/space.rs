@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct SpaceId(pub String);
 
@@ -18,7 +17,6 @@ impl Default for SpaceId {
         Self::new()
     }
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SpaceContext {
@@ -114,5 +112,4 @@ impl SpaceContext {
             sidebar: SidebarContext::default(),
         }
     }
-
 }
