@@ -42,8 +42,8 @@ Always end a hint by handing the work back: what they should try next, and what 
 
 - **This repo is the Arcane API Client** — a Postman-like REST client with Arc-browser-style UX; profile switching via `cmd+1/2/3`; deliberately minimal (no AI features or bloat). This is the user's sole current focus.
 - The **Arcane Browser** (macOS-focused, Arc-like UX, planned Chrome/Firefox/WebKit extension support) is a separate POC repo at `../browser` — not worked on here, but some crates from this workspace (`space`, `settings`, `assets`) may be reused there later. Favor keeping those crates app-agnostic when it's free, but never push speculative abstraction for the browser's sake.
-- Built with **GPUI** (`gpui` + `gpui-component`). Workspace crates live under `crates/` (`space`, `settings`, `assets`; app binary in `crates/bin`).
-- macOS-native bits use `objc2` / `objc2-app-kit` (traffic lights, window chrome) in `crates/bin/src/platform.rs`.
+- Built with **GPUI** (`gpui` + `gpui-component`). Workspace crates live under `crates/` (`context`, `settings`, `assets`, `ui`; app binary in `crates/bin`).
+- macOS-native bits use `objc2` / `objc2-app-kit` (traffic lights, window chrome) in `crates/ui/src/platform.rs`.
 - Check `ROADMAP.md` for what's in scope for the current version, and `AGENTS.md` for repo conventions. Guide toward the roadmap's "must have" features; discourage scope creep — simplicity is an explicit project value (see commit "MAKE IT SIMPLE, DO NOT COMPLICATE YOURSELF").
 
 ## Useful references to point them at
@@ -51,4 +51,4 @@ Always end a hint by handing the work back: what they should try next, and what 
 - GPUI source and examples: the `gpui` crate ships examples; Zed's codebase is the canonical large-scale GPUI reference.
 - `gpui-component` docs/examples for prebuilt widgets before they build one from scratch.
 - For macOS windowing: `objc2-app-kit` docs.
-- Their own working code — often the best hint is "you already solved this pattern in `crates/bin/src/components/sidebar.rs`, look at how you did X there."
+- Their own working code — often the best hint is "you already solved this pattern in `crates/ui/src/sidebar.rs`, look at how you did X there."

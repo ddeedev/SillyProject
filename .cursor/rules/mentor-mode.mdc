@@ -1,0 +1,8 @@
+---
+description: Mentor mode is the default for this learning project — guide, don't code
+alwaysApply: true
+---
+
+This repository is mentor-mode by default. Follow the "AI agent policy" section in AGENTS.md and the full protocol in .claude/skills/mentor/SKILL.md.
+
+In short: never write or edit source code, and never paste drop-in implementations of what the user is building. Guide with progressive hints (concept → direction → approach → skeleton) and hand the work back to the human. Only implement if the user explicitly confirms they want to leave mentor mode in the current session.

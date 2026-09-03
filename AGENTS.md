@@ -8,6 +8,20 @@ Silly is a GPU-accelerated desktop application (intended to become a REST client
 
 The codebase is organized as a Rust workspace. The previous single-crate layout has been restructured into a small monorepo under `crates/`. The author uses a hobby-style workflow with `main`, `develop`, and feature branches (e.g. `vibe`).
 
+## AI agent policy: mentor mode by default
+
+This repository is a deliberate learning project. Contributors write their own code — agents working here must act as **mentors, not implementers**. Do not vibe code this project.
+
+Unless the human explicitly opts out in the current session, an agent MUST:
+
+1. **Never write or edit source code** (`crates/`, `page/`, `Cargo.toml`, CI). Reading is always allowed.
+2. **Never paste drop-in implementations** of what the human is building. Guide with progressive hints instead: concept → direction (point to specific files/types) → approach in prose → small skeleton with `// you fill this in`. Escalate only when they remain stuck.
+3. **Explain the why** behind Rust/GPUI idioms (ownership, `Entity`/`Context`, render cycle, actions, focus), and always hand the work back with a concrete next step and how to verify it (`cargo check`, `cargo run`, expected behavior).
+
+The full protocol lives in the mentor skill: [`.claude/skills/mentor/SKILL.md`](.claude/skills/mentor/SKILL.md) (symlinked into `.agents/skills/mentor` and `.opencode/skills/mentor`). Load and follow it.
+
+<!--**Opt-out:** only if the human explicitly confirms they want implementation (e.g. "leave mentor mode, write it for me") may an agent write code, and only for that task. Non-source meta files (docs, notes, agent configuration) may be written only when the human explicitly requests it. -->
+
 ## Repository structure
 
 ```text
@@ -54,7 +68,9 @@ The codebase is organized as a Rust workspace. The previous single-crate layout 
 ├── .github/workflows/      # CI/CD
 │   ├── deploy.yml          # Build macOS release binary and GitHub Release
 │   └── page.yml            # Build & deploy Zola site to gh-pages
-├── .claude/skills/mentor/  # Mentor skill for the Silly project
+├── .claude/skills/mentor/  # Mentor skill (canonical source; symlinked into .agents/skills/ and .opencode/skills/)
+├── .cursor/rules/          # Cursor rule deferring to the mentor-mode policy above
+├── CLAUDE.md               # Imports this file for Claude Code
 ├── README.md               # Basic run instructions
 ├── NOTE.md                 # Author note about future monorepo plans
 └── ROADMAP.md              # Feature roadmap and status
@@ -225,6 +241,6 @@ The project has very little test coverage. `crates/settings/src/settings.rs` con
 2. **macOS-only native code.** `crates/ui/src/platform.rs` is the only place that reaches into AppKit. Keep it isolated; changes there should not leak into GPUI view code.
 3. **Release CI only targets Apple Silicon macOS.** Do not expect Linux/Windows release binaries from the current workflows.
 4. **Little test coverage.** Verify UI changes by running `cargo run` and manually exercising the UI.
-5. **Unused imports currently generate warnings.** The codebase currently has compiler warnings from unused imports; do not treat a clean warning-free build as required unless asked.
+5. **Keep the build warning-free.** The codebase currently compiles with zero warnings; keep it that way so new warnings stay meaningful.
 6. **The restructure to a workspace is recent.** The previous flat `src/` layout has been replaced by `crates/`. If you encounter old paths in notes or memory, verify against the current workspace layout.
 7. **Roadmap is the source of truth for features.** Check `ROADMAP.md` before starting major work; many core features (REST requests, profiles, auth, history, cache) are still "Plan".

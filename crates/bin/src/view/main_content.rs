@@ -7,7 +7,8 @@ use ui::sidebar::SidebarView;
 use crate::action::{Quit, ToggleSidebar};
 
 pub struct MainContent {
-    space: Entity<SpaceContext>,
+    // Kept alive for upcoming space/profile features; not rendered yet.
+    _space: Entity<SpaceContext>,
     sidebar: Entity<SidebarView>,
     focus_handle: FocusHandle,
 }
@@ -39,7 +40,7 @@ impl MainContent {
         cx.observe(&space, |_this, _space, cx| cx.notify()).detach();
 
         Self {
-            space,
+            _space: space,
             sidebar,
             focus_handle: cx.focus_handle(),
         }
@@ -95,20 +96,5 @@ impl Render for MainContent {
                     }))
                     .child(div()),
             )
-    }
-}
-
-pub trait SpaceContent {
-    fn init() -> Entity<SpaceContext>;
-    fn spawn(name: String, number: u8) -> Entity<SpaceContext>;
-}
-
-impl SpaceContent for MainContent {
-    fn init() -> Entity<SpaceContext> {
-        todo!()
-    }
-
-    fn spawn(name: String, number: u8) -> Entity<SpaceContext> {
-        todo!()
     }
 }

@@ -46,17 +46,4 @@ impl TabData {
     pub fn new_tab(url: String, favicon: String) -> Self {
         Self::Browser(BrowserData::new(url, favicon))
     }
-
-    pub fn new_request(url: String, method: String) -> Self {
-        Self::ApiRequest(ApiRequestData {
-            url,
-            tab_number: todo!(),
-            favicon: todo!(),
-            method: todo!(),
-            params: todo!(),
-            body: todo!(),
-            authorization: todo!(),
-            headers: todo!(),
-        })
-    }
 }

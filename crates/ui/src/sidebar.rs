@@ -1,15 +1,14 @@
 use gpui::{
-    AnyElement, App, Entity, IntoElement, SharedString, Window, deferred, div, img, prelude::*, px,
-    rgb, svg,
+    AnyElement, App, Entity, IntoElement, SharedString, Window, deferred, div, prelude::*, px, rgb,
+    svg,
 };
 use http::Method;
 use context::{
     node::{NodeData, NodeId},
-    space::ProfileContext,
     space::SidebarContext,
     tab_data::TabData,
 };
-use std::{process::id, sync::Mutex, time::Duration};
+use std::time::Duration;
 
 use crate::platform::set_traffic_lights_hidden;
 
@@ -513,52 +512,6 @@ impl AppSidebar {
             }))
     }
 
-    fn render_folder_request(&self) -> impl IntoElement {
-        let expand = true;
-        let name = "Football Live".to_string();
-        div()
-            .w_full()
-            .h(px(40.))
-            .flex()
-            .flex_row()
-            .items_center()
-            .p_2()
-            .gap_2()
-            .rounded(px(10.0))
-            .border_color(rgb(0x565375))
-            .text_base()
-            .hover(|style| style.bg(rgb(0x565375)))
-            .child(
-                div()
-                    .relative()
-                    .w(px(25.0))
-                    .h(px(25.0))
-                    .child(
-                        svg()
-                            .when(!expand, |el| el.path("icons/folder-fill.svg"))
-                            .when(expand, |el| el.path("icons/folder-open-fill.svg"))
-                            .size(px(25.))
-                            .text_color(rgb(0x524C73)),
-                    )
-                    .child(
-                        svg()
-                            .absolute()
-                            .top_0()
-                            .left_0()
-                            .when(!expand, |el| el.path("icons/folder-outline.svg"))
-                            .when(expand, |el| el.path("icons/folder-open-outline.svg"))
-                            .size(px(25.))
-                            .text_color(rgb(0x7A769F)),
-                    ),
-            )
-            .child(
-                div()
-                    .child(name)
-                    .font_weight(gpui::FontWeight::SEMIBOLD)
-                    .text_color(rgb(0xFFFFFF)),
-            )
-    }
-
     fn render_space_selection(&self) -> impl IntoElement {
         div()
             .flex_shrink_0()
@@ -600,7 +553,7 @@ impl AppSidebar {
     fn render_tab(
         &self,
         name: &str,
-        data: &TabData,
+        _data: &TabData,
         open: bool,
         depths: usize,
     ) -> impl IntoElement {

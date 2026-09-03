@@ -6,13 +6,10 @@ edition.workspace = true
 
 [dependencies]
 assets.workspace = true
-settings.workspace = true
 anyhow.workspace = true
 gpui.workspace = true
 gpui-component.workspace = true
 http.workspace = true
-rust-embed.workspace = true
 context.workspace = true
-serde.workspace = true
 ui.workspace = true
 

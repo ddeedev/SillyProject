@@ -21,6 +21,7 @@ pub trait Config: Sized + DeserializeOwned {
 
 impl Config for SpaceContext {
     fn init() -> Result<Self, ConfigError> {
-        Self::from_file("../../../assets/mock/space/first.toml")
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../assets/mock/space/first.toml");
+        Self::from_file(path)
     }
 }
