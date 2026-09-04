@@ -22,7 +22,7 @@
 | Floting Sidebar hover event            | Done   |
 | Favorite Tab                           | Done   |
 | Context Menu                           | Doing  |
-| Folder                                 | Doing  |
+| Folder                                 | Done   |
 | Request View                           | Plan   |
 | Header View                            | Plan   |
 | Authen View                            | Plan   |

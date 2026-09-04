@@ -1,3 +1,4 @@
+use crate::platform::set_traffic_lights_hidden;
 use context::{
     node::{NodeData, NodeId},
     space::SidebarContext,
@@ -8,12 +9,8 @@ use gpui::{
     svg,
 };
 use http::Method;
-use std::time::Duration;
+use std::{fmt::Debug, time::Duration};
 
-use crate::platform::set_traffic_lights_hidden;
-
-// Stateful sidebar view. Owns the docked sidebar, the resize handle,
-// the hover hot-zone and the floating sidebar overlay.
 #[derive(Debug)]
 pub struct SidebarView {
     hidden: bool,
@@ -532,7 +529,7 @@ impl AppSidebar {
                     .render_tab(name.as_str(), &data, open, depths)
                     .into_any_element(),
                 NodeData::Folder { children, expand } => {
-                    let header = self.render_folder(name.as_str(), expand, depths);
+                    let header = self.render_folder(id.clone(), name.as_str(), expand, depths);
                     div()
                         .flex()
                         .flex_col()
@@ -557,14 +554,15 @@ impl AppSidebar {
         open: bool,
         depths: usize,
     ) -> impl IntoElement {
-        let indent_px = 8.0 + (depths as f32 * 12.0);
+        let indent_px = 8.0 + (depths as f32 * 8.0);
         div()
             .w_full()
             .h(px(40.))
             .flex()
             .flex_row()
             .items_center()
-            .p_2()
+            .when(depths == 0, |el| el.pl_2().pl(px(indent_px)))
+            .when(depths > 0, |el| el.ml(px(indent_px)))
             .pl(px(indent_px))
             .gap_2()
             .rounded(px(10.0))
@@ -588,21 +586,43 @@ impl AppSidebar {
             )
     }
 
-    fn render_folder(&self, name: &str, expand: bool, depths: usize) -> impl IntoElement {
-        let indent_px = 8.0 + (depths as f32 * 12.0);
+    fn render_folder(
+        &self,
+        node_id: NodeId,
+        name: &str,
+        expand: bool,
+        depths: usize,
+    ) -> impl IntoElement {
+        let indent_px = 8.0 + (depths as f32 * 8.0);
+        let node_id_clone = node_id.clone();
+        let entity = self.entity.clone();
+        let node_id_for_click = node_id.clone();
+
         div()
+            .id(SharedString::from(node_id_clone.to_string()))
             .w_full()
             .h(px(40.))
             .flex()
             .flex_row()
             .items_center()
-            .p_2()
-            .pl(px(indent_px))
+            .when(depths == 0, |el| el.pl_2().pl(px(indent_px)))
+            .when(depths > 0, |el| el.ml(px(indent_px)))
             .gap_2()
             .rounded(px(10.0))
             .border_color(rgb(0x565375))
             .text_base()
             .hover(|style| style.bg(rgb(0x565375)))
+            .cursor_pointer()
+            .on_click(move |_, _window, cx| {
+                entity.update(cx, |sidebar, cx| {
+                    if let Some(node) = sidebar.nodes.get_mut(&node_id_for_click) {
+                        if let NodeData::Folder { expand, .. } = &mut node.data {
+                            *expand = !*expand;
+                        }
+                        cx.notify();
+                    }
+                });
+            })
             .child(
                 div()
                     .relative()
