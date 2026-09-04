@@ -1,6 +1,6 @@
-use http::Method;
+use http::{Method, request::Parts};
 use serde::{Deserialize, Serialize};
-use serde_with::{DisplayFromStr, serde_as};
+use serde_with::{DisplayFromStr, Map, serde_as};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -42,8 +42,62 @@ impl BrowserData {
     }
 }
 
+impl ApiRequestData {
+    pub fn new(
+        url: String,
+        method: Method,
+        params: HashMap<String, String>,
+        body: String,
+        auth: String,
+        headers: HashMap<String, String>,
+    ) -> Self {
+        let mut favicon: String = String::new();
+        match method {
+            Method::POST => {
+                favicon.push_str("RED");
+            }
+            Method::GET => {
+                favicon.push_str("GREEN");
+            }
+            Method::PUT => {
+                favicon.push_str("CYAN");
+            }
+            Method::DELETE => {
+                favicon.push_str("DARK");
+            }
+            Method::PATCH => {
+                favicon.push_str("YELLOW");
+            }
+            _ => favicon.push_str("WHITE"),
+        };
+        Self {
+            url,
+            authorization: auth,
+            body,
+            headers,
+            params,
+            favicon,
+            method,
+            tab_number: None,
+        }
+    }
+}
+
 impl TabData {
-    pub fn new_tab(url: String, favicon: String) -> Self {
+    pub fn new_browser_tab(url: String, favicon: String) -> Self {
         Self::Browser(BrowserData::new(url, favicon))
+    }
+
+    pub fn new_api_tab(
+        url: String,
+        method: Method,
+        params: HashMap<String, String>,
+        body: String,
+        auth: String,
+        headers: HashMap<String, String>,
+    ) -> Self {
+        Self::ApiRequest(ApiRequestData::new(
+            url, method, params, body, auth, headers,
+        ))
     }
 }

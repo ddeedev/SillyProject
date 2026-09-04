@@ -547,43 +547,42 @@ impl AppSidebar {
         }
     }
 
-    fn render_tab(
-        &self,
-        name: &str,
-        _data: &TabData,
-        open: bool,
-        depths: usize,
-    ) -> impl IntoElement {
+    fn render_tab(&self, name: &str, data: &TabData, open: bool, depths: usize) -> AnyElement {
         let indent_px = 8.0 + (depths as f32 * 8.0);
-        div()
-            .w_full()
-            .h(px(40.))
-            .flex()
-            .flex_row()
-            .items_center()
-            .when(depths == 0, |el| el.pl_2().pl(px(indent_px)))
-            .when(depths > 0, |el| el.ml(px(indent_px)))
-            .pl(px(indent_px))
-            .gap_2()
-            .rounded(px(10.0))
-            .border_color(rgb(0x565375))
-            .text_base()
-            .hover(|style| style.bg(rgb(0x565375)))
-            .child(
-                div().relative().w(px(25.0)).h(px(25.0)).child(
-                    svg()
-                        .when(!open, |el| el.path("icons/method-get.svg"))
-                        .when(open, |el| el.path("icons/method-get.svg"))
-                        .size(px(25.))
-                        .text_color(rgb(0x524C73)),
-                ),
-            )
-            .child(
-                div()
-                    .child(name.to_string())
-                    .font_weight(gpui::FontWeight::SEMIBOLD)
-                    .text_color(rgb(0xFFFFFF)),
-            )
+        if let TabData::ApiRequest(_tab_data) = data {
+            div()
+                .id(SharedString::from(name.to_string()))
+                .h(px(40.))
+                .flex()
+                .flex_row()
+                .items_center()
+                .when(depths == 0, |el| el.pl_2())
+                .when(depths > 0, |el| el.pl_2().ml(px(indent_px)))
+                .gap_2()
+                .rounded(px(10.0))
+                .border_color(rgb(0x565375))
+                .text_base()
+                .cursor_pointer()
+                .hover(|style| style.bg(rgb(0x565375)))
+                .child(
+                    div().relative().w(px(25.0)).h(px(25.0)).child(
+                        svg()
+                            .when(!open, |el| el.path("icons/method-get.svg"))
+                            .when(open, |el| el.path("icons/method-get.svg"))
+                            .size(px(25.))
+                            .text_color(rgb(0x524C73)),
+                    ),
+                )
+                .child(
+                    div()
+                        .child(name.to_string())
+                        .font_weight(gpui::FontWeight::SEMIBOLD)
+                        .text_color(rgb(0xFFFFFF)),
+                )
+                .into_any_element()
+        } else {
+            div().into_any_element()
+        }
     }
 
     fn render_folder(
@@ -600,19 +599,18 @@ impl AppSidebar {
 
         div()
             .id(SharedString::from(node_id_clone.to_string()))
-            .w_full()
             .h(px(40.))
             .flex()
             .flex_row()
             .items_center()
-            .when(depths == 0, |el| el.pl_2().pl(px(indent_px)))
-            .when(depths > 0, |el| el.ml(px(indent_px)))
+            .when(depths == 0, |el| el.pl_2())
+            .when(depths > 0, |el| el.pl_2().ml(px(indent_px)))
             .gap_2()
             .rounded(px(10.0))
             .border_color(rgb(0x565375))
             .text_base()
-            .hover(|style| style.bg(rgb(0x565375)))
             .cursor_pointer()
+            .hover(|style| style.bg(rgb(0x565375)))
             .on_click(move |_, _window, cx| {
                 entity.update(cx, |sidebar, cx| {
                     if let Some(node) = sidebar.nodes.get_mut(&node_id_for_click) {

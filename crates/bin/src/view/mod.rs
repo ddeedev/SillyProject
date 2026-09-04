@@ -9,13 +9,21 @@ mod mock {
     use http::Method;
 
     pub fn sidebar_context() -> SidebarContext {
-        let data_tab1 = TabData::new_tab(
-            "localhost".to_string(),
-            "icons/sidebar-left.svg".to_string(),
+        let data_tab1 = TabData::new_api_tab(
+            "localhost/api/ping".to_string(),
+            Method::GET,
+            HashMap::new(),
+            String::new(),
+            String::new(),
+            HashMap::new(),
         );
-        let data_tab2 = TabData::new_tab(
-            "localhost".to_string(),
-            "icons/sidebar-left.svg".to_string(),
+        let data_tab2 = TabData::new_api_tab(
+            "localhost/api/health".to_string(),
+            Method::GET,
+            HashMap::new(),
+            String::new(),
+            String::new(),
+            HashMap::new(),
         );
 
         let tab1_node_id = NodeId::default();
@@ -96,9 +104,13 @@ mod mock {
             id: folder1_tab1_id.clone(),
             name: "request1".to_string(),
             data: NodeData::Tab {
-                data: TabData::new_tab(
+                data: TabData::new_api_tab(
                     "localhost/api/users".to_string(),
-                    "icons/sidebar-left.svg".to_string(),
+                    Method::GET,
+                    HashMap::from([("page".to_string(), "1".to_string())]),
+                    String::new(),
+                    String::new(),
+                    HashMap::new(),
                 ),
                 open: true,
             },
@@ -108,9 +120,13 @@ mod mock {
             id: folder1_tab2_id.clone(),
             name: "request2".to_string(),
             data: NodeData::Tab {
-                data: TabData::new_tab(
+                data: TabData::new_api_tab(
                     "localhost/api/teams".to_string(),
-                    "icons/sidebar-left.svg".to_string(),
+                    Method::GET,
+                    HashMap::new(),
+                    String::new(),
+                    String::new(),
+                    HashMap::new(),
                 ),
                 open: false,
             },
@@ -142,9 +158,13 @@ mod mock {
             id: folder2_tab1_id.clone(),
             name: "request3".to_string(),
             data: NodeData::Tab {
-                data: TabData::new_tab(
+                data: TabData::new_api_tab(
                     "localhost/api/matches".to_string(),
-                    "icons/sidebar-left.svg".to_string(),
+                    Method::GET,
+                    HashMap::new(),
+                    String::new(),
+                    String::new(),
+                    HashMap::new(),
                 ),
                 open: false,
             },
@@ -173,13 +193,117 @@ mod mock {
             position: 2,
         };
 
-        let folder_list = vec![folder1_node_id.clone(), folder2_node_id.clone()];
+        // nested folder mock: folder3 -> subfolder1 (tab + subsubfolder) -> subsubfolder (tabs)
+        let folder3_node_id = NodeId::default();
+        let folder3_sub1_id = NodeId::default();
+        let folder3_subsub_id = NodeId::default();
+        let folder3_sub1_tab_id = NodeId::default();
+        let folder3_subsub_tab1_id = NodeId::default();
+        let folder3_subsub_tab2_id = NodeId::default();
+
+        let folder3_sub1_tab = Node {
+            id: folder3_sub1_tab_id.clone(),
+            name: "get_user".to_string(),
+            data: NodeData::Tab {
+                data: TabData::new_api_tab(
+                    "localhost/api/users/1".to_string(),
+                    Method::GET,
+                    HashMap::new(),
+                    String::new(),
+                    String::new(),
+                    HashMap::new(),
+                ),
+                open: false,
+            },
+            position: 1,
+        };
+        let folder3_subsub_tab1 = Node {
+            id: folder3_subsub_tab1_id.clone(),
+            name: "delete_user".to_string(),
+            data: NodeData::Tab {
+                data: TabData::ApiRequest(ApiRequestData {
+                    url: "localhost/api/users/1".to_string(),
+                    tab_number: None,
+                    favicon: "icons/sidebar-left.svg".to_string(),
+                    method: Method::DELETE,
+                    params: HashMap::new(),
+                    body: String::new(),
+                    authorization: "Bearer mock-token".to_string(),
+                    headers: HashMap::new(),
+                }),
+                open: false,
+            },
+            position: 1,
+        };
+        let folder3_subsub_tab2 = Node {
+            id: folder3_subsub_tab2_id.clone(),
+            name: "update_user".to_string(),
+            data: NodeData::Tab {
+                data: TabData::ApiRequest(ApiRequestData {
+                    url: "localhost/api/users/1".to_string(),
+                    tab_number: None,
+                    favicon: "icons/sidebar-left.svg".to_string(),
+                    method: Method::PATCH,
+                    params: HashMap::new(),
+                    body: r#"{"name": "renamed_user"}"#.to_string(),
+                    authorization: "Bearer mock-token".to_string(),
+                    headers: HashMap::from([(
+                        "Content-Type".to_string(),
+                        "application/json".to_string(),
+                    )]),
+                }),
+                open: false,
+            },
+            position: 2,
+        };
+        let folder3_subsub = Node {
+            id: folder3_subsub_id.clone(),
+            name: "subsubfolder".to_string(),
+            data: NodeData::Folder {
+                children: vec![
+                    folder3_subsub_tab1_id.clone(),
+                    folder3_subsub_tab2_id.clone(),
+                ],
+                expand: true,
+            },
+            position: 2,
+        };
+        let folder3_sub1 = Node {
+            id: folder3_sub1_id.clone(),
+            name: "subfolder1".to_string(),
+            data: NodeData::Folder {
+                children: vec![folder3_sub1_tab_id.clone(), folder3_subsub_id.clone()],
+                expand: true,
+            },
+            position: 1,
+        };
+        let folder3 = Node {
+            id: folder3_node_id.clone(),
+            name: "folder3".to_string(),
+            data: NodeData::Folder {
+                children: vec![folder3_sub1_id.clone()],
+                expand: true,
+            },
+            position: 3,
+        };
+
+        let folder_list = vec![
+            folder1_node_id.clone(),
+            folder2_node_id.clone(),
+            folder3_node_id.clone(),
+        ];
         nodes.insert(folder1_tab1_id, folder1_tab1);
         nodes.insert(folder1_tab2_id, folder1_tab2);
         nodes.insert(folder1_tab3_id, folder1_tab3);
         nodes.insert(folder2_tab1_id, folder2_tab1);
         nodes.insert(folder1_node_id, folder1);
         nodes.insert(folder2_node_id, folder2);
+        nodes.insert(folder3_sub1_tab_id, folder3_sub1_tab);
+        nodes.insert(folder3_subsub_tab1_id, folder3_subsub_tab1);
+        nodes.insert(folder3_subsub_tab2_id, folder3_subsub_tab2);
+        nodes.insert(folder3_subsub_id, folder3_subsub);
+        nodes.insert(folder3_sub1_id, folder3_sub1);
+        nodes.insert(folder3_node_id, folder3);
 
         SidebarContext::new()
             .with_nodes(nodes)
