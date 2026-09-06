@@ -11,7 +11,7 @@ use gpui::{
 use http::Method;
 use std::{fmt::Debug, time::Duration};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SidebarView {
     hidden: bool,
     width: f32,
@@ -25,11 +25,7 @@ pub struct SidebarView {
 }
 
 impl SidebarView {
-    pub fn new(
-        _cx: &mut gpui::Context<Self>,
-        space_name: SharedString,
-        entity: Entity<SidebarContext>,
-    ) -> Self {
+    pub fn new(space_name: SharedString, entity: Entity<SidebarContext>) -> Self {
         Self {
             hidden: false,
             width: 242.0,
@@ -41,6 +37,22 @@ impl SidebarView {
             space_name,
             entity,
         }
+    }
+
+    pub fn reset(&mut self, cx: &mut gpui::Context<Self>) {
+        *self = Self {
+            hidden: false,
+            width: 242.0,
+            width_anim: 242.0,
+            animating: false,
+            floating_visible: false,
+            floating_progress: 0.0,
+            floating_animating: false,
+            space_name: self.space_name.clone(),
+            entity: self.entity.clone(),
+        };
+
+        cx.notify();
     }
 
     // 1.0 when fully open, 0.0 when fully hidden (animated).

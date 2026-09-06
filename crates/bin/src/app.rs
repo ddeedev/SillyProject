@@ -1,5 +1,4 @@
-use crate::action::Quit;
-use crate::keybind::register_keybind;
+use crate::action::{Quit, register};
 use crate::menu::init_app_menu;
 use crate::view::main_content::MainContent;
 use assets::{Assets, load_fonts_asset};
@@ -16,7 +15,7 @@ impl AppRunner {
         Application::new().with_assets(Assets).run(|cx: &mut App| {
             // load asset
             load_fonts_asset(cx);
-            register_keybind(cx);
+            register(cx);
             init_app_menu(cx);
 
             theme::init(cx);

@@ -1,10 +1,11 @@
 pub mod main_content;
+pub mod space_content;
 
 mod mock {
     use std::collections::HashMap;
 
     use context::node::{Node, NodeData, NodeId};
-    use context::space::SidebarContext;
+    use context::space::{ProfileContext, ProfileId, SidebarContext, SpaceContext};
     use context::tab_data::{ApiRequestData, TabData};
     use http::Method;
 
@@ -309,5 +310,135 @@ mod mock {
             .with_nodes(nodes)
             .with_favorite(fav_tab)
             .with_folder(folder_list)
+    }
+
+    pub fn api_tab(
+        name: &str,
+        url: &str,
+        method: Method,
+        position: u8,
+        open: bool,
+    ) -> (NodeId, Node) {
+        let id = NodeId::default();
+        let node = Node {
+            id: id.clone(),
+            name: name.to_string(),
+            data: NodeData::Tab {
+                data: TabData::new_api_tab(
+                    url.to_string(),
+                    method,
+                    HashMap::new(),
+                    String::new(),
+                    String::new(),
+                    HashMap::new(),
+                ),
+                open,
+            },
+            position,
+        };
+        (id, node)
+    }
+
+    pub fn profile(pseudonym: &str) -> ProfileContext {
+        ProfileContext {
+            id: ProfileId::new(),
+            pseudonym: pseudonym.to_string(),
+            email: None,
+        }
+    }
+
+    pub fn work_sidebar() -> SidebarContext {
+        let (fav1_id, fav1) = api_tab(
+            "list_repos",
+            "api.github.com/user/repos",
+            Method::GET,
+            1,
+            false,
+        );
+        let (fav2_id, fav2) = api_tab(
+            "create_issue",
+            "api.github.com/repos/ddeedev/silly/issues",
+            Method::POST,
+            2,
+            false,
+        );
+        let (t1_id, t1) = api_tab(
+            "get_repo",
+            "api.github.com/repos/ddeedev/silly",
+            Method::GET,
+            1,
+            false,
+        );
+        let (t2_id, t2) = api_tab(
+            "list_commits",
+            "api.github.com/repos/ddeedev/silly/commits",
+            Method::GET,
+            2,
+            false,
+        );
+        let folder_id = NodeId::default();
+        let folder = Node {
+            id: folder_id.clone(),
+            name: "github".to_string(),
+            data: NodeData::Folder {
+                children: vec![t1_id.clone(), t2_id.clone()],
+                expand: true,
+            },
+            position: 1,
+        };
+
+        let mut nodes: HashMap<NodeId, Node> = HashMap::new();
+        nodes.insert(fav1_id.clone(), fav1);
+        nodes.insert(fav2_id.clone(), fav2);
+        nodes.insert(t1_id, t1);
+        nodes.insert(t2_id, t2);
+        nodes.insert(folder_id.clone(), folder);
+
+        SidebarContext::new()
+            .with_nodes(nodes)
+            .with_favorite(vec![fav1_id, fav2_id])
+            .with_folder(vec![folder_id])
+    }
+
+    pub fn lab_sidebar() -> SidebarContext {
+        let (fav_id, fav) = api_tab("get_ip", "httpbin.org/ip", Method::GET, 1, false);
+        let (t1_id, t1) = api_tab("post_echo", "httpbin.org/post", Method::POST, 1, false);
+        let folder_id = NodeId::default();
+        let folder = Node {
+            id: folder_id.clone(),
+            name: "httpbin".to_string(),
+            data: NodeData::Folder {
+                children: vec![t1_id.clone()],
+                expand: false,
+            },
+            position: 1,
+        };
+
+        let mut nodes: HashMap<NodeId, Node> = HashMap::new();
+        nodes.insert(fav_id.clone(), fav);
+        nodes.insert(t1_id, t1);
+        nodes.insert(folder_id.clone(), folder);
+
+        SidebarContext::new()
+            .with_nodes(nodes)
+            .with_favorite(vec![fav_id])
+            .with_folder(vec![folder_id])
+    }
+
+    pub fn work_space() -> SpaceContext {
+        SpaceContext::new("personal".to_string(), 1, profile("profile_1"))
+    }
+
+    pub fn spaces() -> Vec<SpaceContext> {
+        let mut personal = SpaceContext::new("personal".to_string(), 1, profile("profile_1"));
+        personal.sidebar = sidebar_context();
+
+        let mut work = SpaceContext::new("work".to_string(), 2, profile("profile_2"));
+        work.sidebar = work_sidebar();
+
+        let mut lab = SpaceContext::new("lab".to_string(), 3, profile("profile_3"));
+        lab.sidebar = lab_sidebar();
+
+        vec![personal, work, lab]
     }
 }

@@ -1,26 +1,40 @@
-use context::space::{ProfileId, SidebarContext, SpaceContext};
+use std::vec;
+
+use super::mock;
+use crate::{
+    action::{Quit, ResetSidebar, SwitchSpace, ToggleSidebar},
+    view::{
+        mock::{work_sidebar, work_space},
+        space_content::SpaceContent,
+    },
+};
+use context::space::{ProfileId, SidebarContext, SpaceContext, SpaceId};
 use gpui::{
-    App, Context, Entity, FocusHandle, Focusable, SharedString, Window, div, prelude::*, px, rgb,
+    App, Context, Entity, FocusHandle, Focusable, Global, SharedString, Window, div, prelude::*,
+    px, rgb,
 };
 use ui::sidebar::SidebarView;
 
-use crate::action::{Quit, ToggleSidebar};
+impl Global for MainContent {}
 
 pub struct MainContent {
-    // Kept alive for upcoming space/profile features; not rendered yet.
-    _space: Entity<SpaceContext>,
-    sidebar: Entity<SidebarView>,
-    focus_handle: FocusHandle,
+    pub current_space: usize,
+    pub spaces: Vec<SpaceContent>,
+    pub focus_handle: FocusHandle,
 }
 
 impl MainContent {
+    pub fn global(cx: &App) -> &Self {
+        cx.global()
+    }
+
+    // TODO::
+    // Using db or local space file instead of hardcode
     pub fn new(cx: &mut Context<Self>) -> Self {
         let space_sidebar = SidebarContext::new();
-        let space_sidebar_entity = cx.new(|_| super::mock::sidebar_context());
-
+        let space_sidebar_entity = cx.new(|_| mock::sidebar_context());
         let space_name: SharedString = "mock".to_string().into();
-
-        let sidebar = cx.new(|_cx| SidebarView::new(_cx, space_name.clone(), space_sidebar_entity));
+        let sidebar = cx.new(|_cx| SidebarView::new(space_name.clone(), space_sidebar_entity));
         cx.observe(&sidebar, |_this, _sidebar, cx| cx.notify())
             .detach();
 
@@ -39,11 +53,56 @@ impl MainContent {
         let space = cx.new(|_| space_ctx);
         cx.observe(&space, |_this, _space, cx| cx.notify()).detach();
 
-        Self {
-            _space: space,
-            sidebar,
+        let default_space = SpaceContent { space, sidebar };
+
+        let work_space = work_space();
+        let work_sidebar = work_sidebar();
+        let sidebar_ctx = cx.new(|_| work_sidebar);
+        cx.observe(&sidebar_ctx, |_this, _sidebar, cx| cx.notify())
+            .detach();
+
+        let sidebar_view = SidebarView::new(work_space.name.clone().into(), sidebar_ctx);
+        let work_space_entity = cx.new(|_| work_space);
+        cx.observe(&work_space_entity, |_this, _sidebar, cx| cx.notify())
+            .detach();
+
+        let space_content = SpaceContent::new(work_space_entity, cx.new(|_| sidebar_view));
+
+        let content = Self {
+            current_space: 1,
+            spaces: vec![default_space.clone(), space_content.clone()],
             focus_handle: cx.focus_handle(),
+        };
+
+        //cx.set_global(MainContent {
+        //    current_space: default_space.clone(),
+        //    spaces: vec![default_space],
+        //    focus_handle: cx.focus_handle(),
+        //});
+
+        content
+    }
+
+    pub fn new_space(&mut self, cx: &mut Context<Self>, space_ctn: SpaceContent) {
+        self.spaces.push(space_ctn);
+        self.current_space = self.spaces.len();
+        cx.notify();
+    }
+
+    pub fn with_space(&mut self, cx: &mut Context<Self>, space_ctn: SpaceContent) {
+        self.spaces.push(space_ctn);
+        cx.notify();
+    }
+
+    pub fn switch_space(&mut self, cx: &mut Context<Self>, number: usize) {
+        if number > 0 && number <= self.spaces.len() {
+            self.current_space = number;
+            cx.notify();
         }
+    }
+
+    pub fn current_sidebar(&self) -> Entity<SidebarView> {
+        self.spaces[self.current_space - 1].sidebar.clone()
     }
 }
 
@@ -55,7 +114,8 @@ impl Focusable for MainContent {
 
 impl Render for MainContent {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let sidebar_fraction = self.sidebar.read(cx).visible_fraction();
+        let current_sidebar = self.current_sidebar();
+        let sidebar_fraction = current_sidebar.read(cx).visible_fraction();
 
         div()
             .key_context("main_view")
@@ -64,13 +124,21 @@ impl Render for MainContent {
                 window.remove_window();
             })
             .on_action(cx.listener(|this, _: &ToggleSidebar, _window, cx| {
-                this.sidebar.update(cx, |sidebar, cx| sidebar.toggle(cx));
+                this.current_sidebar()
+                    .update(cx, |sidebar, sb_cx| sidebar.toggle(sb_cx));
+            }))
+            .on_action(cx.listener(|this, action: &SwitchSpace, _window, cx| {
+                this.switch_space(cx, action.0);
+            }))
+            .on_action(cx.listener(|this, _: &ResetSidebar, _window, cx| {
+                this.current_sidebar()
+                    .update(cx, |sidebar, sb_cx| sidebar.reset(sb_cx));
             }))
             .flex()
             .flex_row()
             .size_full()
             .bg(rgb(0x636080))
-            .child(self.sidebar.clone())
+            .child(current_sidebar)
             .child(
                 div()
                     .flex()
@@ -91,7 +159,7 @@ impl Render for MainContent {
                     .text_xl()
                     .text_color(rgb(0xffffff))
                     .on_mouse_move(cx.listener(|this, _: &gpui::MouseMoveEvent, _window, cx| {
-                        this.sidebar
+                        this.current_sidebar()
                             .update(cx, |sidebar, cx| sidebar.set_floating_visible(false, cx));
                     }))
                     .child(div()),

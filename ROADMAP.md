@@ -23,6 +23,7 @@
 | Favorite Tab                           | Done   |
 | Context Menu                           | Doing  |
 | Folder                                 | Done   |
+| Space Switching                        | Doing  |
 | Request View                           | Plan   |
 | Header View                            | Plan   |
 | Authen View                            | Plan   |

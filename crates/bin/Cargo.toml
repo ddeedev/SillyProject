@@ -12,4 +12,4 @@ gpui-component.workspace = true
 http.workspace = true
 context.workspace = true
 ui.workspace = true
-
+serde.workspace = true
