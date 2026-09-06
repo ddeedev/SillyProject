@@ -1,8 +1,5 @@
-use super::mock;
-use context::space::{ProfileId, SidebarContext, SpaceContext, SpaceId};
-use gpui::{
-    App, Context, Entity, FocusHandle, Focusable, SharedString, Window, div, prelude::*, px, rgb,
-};
+use context::space::SpaceContext;
+use gpui::Entity;
 use ui::sidebar::SidebarView;
 
 #[derive(Debug, Clone)]
