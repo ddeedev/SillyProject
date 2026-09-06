@@ -5,7 +5,7 @@ use crate::view::{
     mock::{work_sidebar, work_space},
     space_content::SpaceContent,
 };
-use action::action::{Quit, ResetSidebar, SwitchSpace, ToggleSidebar};
+use action::{Quit, ResetSidebar, SwitchSpace, ToggleSidebar};
 use context::space::{ProfileId, SidebarContext, SpaceContext};
 use gpui::{
     App, Context, Entity, FocusHandle, Focusable, Global, SharedString, Window, div, prelude::*,

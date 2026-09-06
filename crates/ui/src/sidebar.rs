@@ -1,6 +1,6 @@
 use crate::platform::set_traffic_lights_hidden;
 
-use action::action::SwitchSpace;
+use action::SwitchSpace;
 use context::{
     node::{NodeData, NodeId},
     space::SidebarContext,

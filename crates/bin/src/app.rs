@@ -1,7 +1,6 @@
 use crate::menu::init_app_menu;
 use crate::view::main_content::MainContent;
-use action::action::Quit;
-use action::keybind;
+use action::Quit;
 use assets::{Assets, load_fonts_asset};
 use gpui::{
     App, Application, TitlebarOptions, WindowBackgroundAppearance, WindowKind, WindowOptions,
@@ -16,7 +15,7 @@ impl AppRunner {
         Application::new().with_assets(Assets).run(|cx: &mut App| {
             // load asset
             load_fonts_asset(cx);
-            keybind::register_keybind(cx);
+            action::register_keybind(cx);
             init_app_menu(cx);
 
             theme::init(cx);
