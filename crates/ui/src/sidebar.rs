@@ -285,11 +285,14 @@ impl Render for SidebarView {
             ))
     }
 }
+
+type ToggleHadler = Box<dyn Fn(&mut Window, &mut App) + 'static>;
+
 #[derive(IntoElement)]
 pub struct AppSidebar {
     hide: bool,
     width: f32,
-    on_toggle: Option<Box<dyn Fn(&mut Window, &mut App) + 'static>>,
+    on_toggle: Option<ToggleHadler>,
     space_name: SharedString,
     entity: Entity<SidebarContext>,
 }
@@ -371,8 +374,6 @@ impl RenderOnce for AppSidebar {
             )
     }
 }
-
-type ToggleHadler = Box<dyn Fn(&mut Window, &mut App) + 'static>;
 
 impl AppSidebar {
     fn render_header_with_toggle(&self, on_toggle: Option<ToggleHadler>) -> impl IntoElement {
