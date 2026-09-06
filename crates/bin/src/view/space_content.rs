@@ -12,7 +12,6 @@ pub struct SpaceContent {
 }
 
 impl SpaceContent {
-
     pub fn new(space: Entity<SpaceContext>, sidebar: Entity<SidebarView>) -> Self {
         Self { space, sidebar }
     }
