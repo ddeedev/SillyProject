@@ -20,6 +20,7 @@ pub struct MainContent {
     pub spaces: Vec<SpaceContent>,
     pub space_logos: Vec<String>,
     pub focus_handle: FocusHandle,
+    focused: bool,
 }
 
 impl MainContent {
@@ -39,10 +40,6 @@ impl MainContent {
             logos.push(logo.to_string());
         }
 
-        let sidebar = cx.new(|_cx| SidebarView::new(space_name.clone(), space_sidebar_entity));
-        cx.observe(&sidebar, |_this, _sidebar, cx| cx.notify())
-            .detach();
-
         let space_ctx = SpaceContext {
             id: context::space::SpaceId(1.to_string()),
             number: 1,
@@ -54,6 +51,13 @@ impl MainContent {
             name: space_name.to_string(),
             sidebar: space_sidebar,
         };
+
+        let sidebar = cx.new(|_cx| {
+            SidebarView::new(space_name.clone(), space_ctx.number, space_sidebar_entity)
+        });
+
+        cx.observe(&sidebar, |_this, _sidebar, cx| cx.notify())
+            .detach();
 
         let space = cx.new(|_| space_ctx);
         cx.observe(&space, |_this, _space, cx| cx.notify()).detach();
@@ -70,18 +74,42 @@ impl MainContent {
         cx.observe(&sidebar_ctx, |_this, _sidebar, cx| cx.notify())
             .detach();
 
-        let sidebar_view = SidebarView::new(work_space.name.clone().into(), sidebar_ctx);
+        let sidebar_view = SidebarView::new(
+            work_space.name.clone().into(),
+            work_space.number,
+            sidebar_ctx,
+        );
+
         let work_space_entity = cx.new(|_| work_space);
         cx.observe(&work_space_entity, |_this, _sidebar, cx| cx.notify())
             .detach();
 
         let space_content = SpaceContent::new(work_space_entity, cx.new(|_| sidebar_view));
 
+        for space in [&default_space, &space_content] {
+            space.sidebar.update(cx, |sidebar, sb_cx| {
+                sidebar.register_logos(sb_cx, logos.clone());
+                sidebar.set_active_space(1, sb_cx);
+            });
+        }
+
         Self {
             current_space: 1,
             spaces: vec![default_space.clone(), space_content.clone()],
             focus_handle: cx.focus_handle(),
             space_logos: logos,
+            focused: false,
+        }
+    }
+
+    fn sync_sidebars(&self, cx: &mut Context<Self>) {
+        let logos = self.retrive_logos();
+        let active = self.current_space;
+        for space in &self.spaces {
+            space.sidebar.update(cx, |sidebar, sb_cx| {
+                sidebar.register_logos(sb_cx, logos.clone());
+                sidebar.set_active_space(active, sb_cx);
+            });
         }
     }
 
@@ -91,6 +119,7 @@ impl MainContent {
         }
         self.spaces.push(space_ctn);
         self.current_space = self.spaces.len();
+        self.sync_sidebars(cx);
         cx.notify();
     }
 
@@ -102,12 +131,14 @@ impl MainContent {
             self.spaces.push(space_ctn);
         }
         self.current_space = 1;
+        self.sync_sidebars(cx);
         cx.notify();
     }
 
     pub fn switch_space(&mut self, cx: &mut Context<Self>, number: usize) {
         if number > 0 && number <= self.spaces.len() {
             self.current_space = number;
+            self.sync_sidebars(cx);
             cx.notify();
         }
     }
@@ -128,13 +159,13 @@ impl Focusable for MainContent {
 }
 
 impl Render for MainContent {
-    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let current_sidebar = self.current_sidebar();
-        let space_logos = self.retrive_logos();
-        current_sidebar.update(cx, |sidebar, sb_cx| {
-            sidebar.register_logos(sb_cx, space_logos)
-        });
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        if !self.focused {
+            window.focus(&self.focus_handle);
+            self.focused = true;
+        }
 
+        let current_sidebar = self.current_sidebar();
         let sidebar_fraction = current_sidebar.read(cx).visible_fraction();
 
         div()
@@ -183,6 +214,7 @@ impl Render for MainContent {
                             .update(cx, |sidebar, cx| sidebar.set_floating_visible(false, cx));
                     })),
             )
+            // request UI
             .child(div().flex_col().flex_col())
     }
 }

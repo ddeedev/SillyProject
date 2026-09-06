@@ -25,12 +25,17 @@ pub struct SidebarView {
     space_name: SharedString,
     entity: Entity<SidebarContext>,
     space_logos: Vec<String>,
+    active_space: usize,
 }
 
 impl SidebarView {
     const DEFAULT_WIDTH: f32 = 242.0;
 
-    pub fn new(space_name: SharedString, entity: Entity<SidebarContext>) -> Self {
+    pub fn new(
+        space_name: SharedString,
+        active_space: usize,
+        entity: Entity<SidebarContext>,
+    ) -> Self {
         Self {
             hidden: false,
             width: 242.0,
@@ -40,13 +45,25 @@ impl SidebarView {
             floating_progress: 0.0,
             floating_animating: false,
             space_logos: vec![],
+            active_space,
             space_name,
             entity,
         }
     }
 
     pub fn register_logos(&mut self, cx: &mut gpui::Context<Self>, space_logos: Vec<String>) {
+        if self.space_logos == space_logos {
+            return;
+        }
         self.space_logos = space_logos;
+        cx.notify();
+    }
+
+    pub fn set_active_space(&mut self, active_space: usize, cx: &mut gpui::Context<Self>) {
+        if self.active_space == active_space {
+            return;
+        }
+        self.active_space = active_space;
         cx.notify();
     }
 
@@ -227,6 +244,7 @@ impl Render for SidebarView {
                             AppSidebar::new(
                                 false,
                                 self.space_name.clone(),
+                                self.active_space,
                                 self.entity.clone(),
                                 self.space_logos.clone(),
                             )
@@ -278,6 +296,7 @@ impl Render for SidebarView {
                                         AppSidebar::new(
                                             false,
                                             self.space_name.clone(),
+                                            self.active_space,
                                             self.entity.clone(),
                                             self.space_logos.clone(),
                                         )
@@ -307,6 +326,7 @@ pub struct AppSidebar {
     width: f32,
     on_toggle: Option<ToggleHadler>,
     space_name: SharedString,
+    active_space: usize,
     entity: Entity<SidebarContext>,
     space_logos: Vec<String>,
 }
@@ -315,6 +335,7 @@ impl AppSidebar {
     pub fn new(
         hide: bool,
         space_name: SharedString,
+        active_space: usize,
         entity: Entity<SidebarContext>,
         space_logos: Vec<String>,
     ) -> Self {
@@ -323,6 +344,7 @@ impl AppSidebar {
             width: 240.0,
             on_toggle: None,
             space_name,
+            active_space,
             space_logos,
             entity,
         }
@@ -554,8 +576,10 @@ impl AppSidebar {
             .text_xl()
             .children(self.space_logos.iter().enumerate().map(|(idx, s)| {
                 let space_number = idx + 1;
+                let is_active = space_number == self.active_space;
+
                 div()
-                    .id(SharedString::from(format!("space-selection-{s}")))
+                    .id(("space-selection", idx as u64))
                     .text_base()
                     .cursor_pointer()
                     .on_click(move |_event, window, cx| {
@@ -564,7 +588,11 @@ impl AppSidebar {
                     .text_center()
                     .rounded(px(6.0))
                     .w_10()
-                    .bg(rgb(0x7A769F))
+                    .bg(if is_active {
+                        rgb(0x7A769F)
+                    } else {
+                        rgb(0x565375)
+                    })
                     .child(s.to_string())
             }))
     }

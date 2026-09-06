@@ -23,7 +23,7 @@ pub struct SpaceContext {
     pub id: SpaceId,
     // number use for cmd + number to switch space
     pub name: String,
-    pub number: u8,
+    pub number: usize,
     pub profile: ProfileContext,
     pub sidebar: SidebarContext,
 }
@@ -103,7 +103,7 @@ impl Default for SidebarContext {
 }
 
 impl SpaceContext {
-    pub fn new(name: String, number: u8, profile: ProfileContext) -> Self {
+    pub fn new(name: String, number: usize, profile: ProfileContext) -> Self {
         Self {
             id: SpaceId::default(),
             name,
