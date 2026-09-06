@@ -1,4 +1,6 @@
 use crate::platform::set_traffic_lights_hidden;
+
+use action::action::SwitchSpace;
 use context::{
     node::{NodeData, NodeId},
     space::SidebarContext,
@@ -22,9 +24,12 @@ pub struct SidebarView {
     floating_animating: bool,
     space_name: SharedString,
     entity: Entity<SidebarContext>,
+    space_logos: Vec<String>,
 }
 
 impl SidebarView {
+    const DEFAULT_WIDTH: f32 = 242.0;
+
     pub fn new(space_name: SharedString, entity: Entity<SidebarContext>) -> Self {
         Self {
             hidden: false,
@@ -34,23 +39,25 @@ impl SidebarView {
             floating_visible: false,
             floating_progress: 0.0,
             floating_animating: false,
+            space_logos: vec![],
             space_name,
             entity,
         }
     }
 
+    pub fn register_logos(&mut self, cx: &mut gpui::Context<Self>, space_logos: Vec<String>) {
+        self.space_logos = space_logos;
+        cx.notify();
+    }
+
     pub fn reset(&mut self, cx: &mut gpui::Context<Self>) {
-        *self = Self {
-            hidden: false,
-            width: 242.0,
-            width_anim: 242.0,
-            animating: false,
-            floating_visible: false,
-            floating_progress: 0.0,
-            floating_animating: false,
-            space_name: self.space_name.clone(),
-            entity: self.entity.clone(),
-        };
+        self.hidden = false;
+        self.width = Self::DEFAULT_WIDTH;
+        self.width_anim = Self::DEFAULT_WIDTH;
+        self.animating = false;
+        self.floating_visible = false;
+        self.floating_progress = 0.0;
+        self.floating_animating = false;
 
         cx.notify();
     }
@@ -217,11 +224,16 @@ impl Render for SidebarView {
                         .flex()
                         .justify_end()
                         .child(
-                            AppSidebar::new(false, self.space_name.clone(), self.entity.clone())
-                                .width(self.width)
-                                .toggle_sidebar(move |window, cx| {
-                                    toggle(&gpui::ClickEvent::default(), window, cx);
-                                }),
+                            AppSidebar::new(
+                                false,
+                                self.space_name.clone(),
+                                self.entity.clone(),
+                                self.space_logos.clone(),
+                            )
+                            .width(self.width)
+                            .toggle_sidebar(move |window, cx| {
+                                toggle(&gpui::ClickEvent::default(), window, cx);
+                            }),
                         ),
                 )
                 .child(
@@ -267,6 +279,7 @@ impl Render for SidebarView {
                                             false,
                                             self.space_name.clone(),
                                             self.entity.clone(),
+                                            self.space_logos.clone(),
                                         )
                                         .width(self.width)
                                         .toggle_sidebar(
@@ -295,15 +308,22 @@ pub struct AppSidebar {
     on_toggle: Option<ToggleHadler>,
     space_name: SharedString,
     entity: Entity<SidebarContext>,
+    space_logos: Vec<String>,
 }
 
 impl AppSidebar {
-    pub fn new(hide: bool, space_name: SharedString, entity: Entity<SidebarContext>) -> Self {
+    pub fn new(
+        hide: bool,
+        space_name: SharedString,
+        entity: Entity<SidebarContext>,
+        space_logos: Vec<String>,
+    ) -> Self {
         Self {
             hide,
             width: 240.0,
             on_toggle: None,
             space_name,
+            space_logos,
             entity,
         }
     }
@@ -524,10 +544,29 @@ impl AppSidebar {
 
     fn render_space_selection(&self) -> impl IntoElement {
         div()
-            .flex_shrink_0()
+            .w_full()
+            .flex()
+            .flex_row()
+            .flex_wrap()
+            .justify_center()
             .h(px(30.0))
-            .bg(rgb(0x7A769F))
-            .rounded(px(6.0))
+            .gap_2()
+            .text_xl()
+            .children(self.space_logos.iter().enumerate().map(|(idx, s)| {
+                let space_number = idx + 1;
+                div()
+                    .id(SharedString::from(format!("space-selection-{s}")))
+                    .text_base()
+                    .cursor_pointer()
+                    .on_click(move |_event, window, cx| {
+                        window.dispatch_action(Box::new(SwitchSpace(space_number)), cx);
+                    })
+                    .text_center()
+                    .rounded(px(6.0))
+                    .w_10()
+                    .bg(rgb(0x7A769F))
+                    .child(s.to_string())
+            }))
     }
 
     fn render_node(&self, id: &NodeId, depths: usize, cx: &mut App) -> AnyElement {

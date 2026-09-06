@@ -1,14 +1,12 @@
 use std::vec;
 
 use super::mock;
-use crate::{
-    action::{Quit, ResetSidebar, SwitchSpace, ToggleSidebar},
-    view::{
-        mock::{work_sidebar, work_space},
-        space_content::SpaceContent,
-    },
+use crate::view::{
+    mock::{work_sidebar, work_space},
+    space_content::SpaceContent,
 };
-use context::space::{ProfileId, SidebarContext, SpaceContext, SpaceId};
+use action::action::{Quit, ResetSidebar, SwitchSpace, ToggleSidebar};
+use context::space::{ProfileId, SidebarContext, SpaceContext};
 use gpui::{
     App, Context, Entity, FocusHandle, Focusable, Global, SharedString, Window, div, prelude::*,
     px, rgb,
@@ -20,6 +18,7 @@ impl Global for MainContent {}
 pub struct MainContent {
     pub current_space: usize,
     pub spaces: Vec<SpaceContent>,
+    pub space_logos: Vec<String>,
     pub focus_handle: FocusHandle,
 }
 
@@ -31,9 +30,15 @@ impl MainContent {
     // TODO::
     // Using db or local space file instead of hardcode
     pub fn new(cx: &mut Context<Self>) -> Self {
+        let mut logos: Vec<String> = Vec::new();
+
         let space_sidebar = SidebarContext::new();
         let space_sidebar_entity = cx.new(|_| mock::sidebar_context());
         let space_name: SharedString = "mock".to_string().into();
+        if let Some(logo) = space_name.chars().nth(0) {
+            logos.push(logo.to_string());
+        }
+
         let sidebar = cx.new(|_cx| SidebarView::new(space_name.clone(), space_sidebar_entity));
         cx.observe(&sidebar, |_this, _sidebar, cx| cx.notify())
             .detach();
@@ -56,6 +61,10 @@ impl MainContent {
         let default_space = SpaceContent { space, sidebar };
 
         let work_space = work_space();
+        if let Some(logo) = work_space.name.chars().nth(0) {
+            logos.push(logo.to_string());
+        }
+
         let work_sidebar = work_sidebar();
         let sidebar_ctx = cx.new(|_| work_sidebar);
         cx.observe(&sidebar_ctx, |_this, _sidebar, cx| cx.notify())
@@ -68,29 +77,31 @@ impl MainContent {
 
         let space_content = SpaceContent::new(work_space_entity, cx.new(|_| sidebar_view));
 
-        let content = Self {
+        Self {
             current_space: 1,
             spaces: vec![default_space.clone(), space_content.clone()],
             focus_handle: cx.focus_handle(),
-        };
-
-        //cx.set_global(MainContent {
-        //    current_space: default_space.clone(),
-        //    spaces: vec![default_space],
-        //    focus_handle: cx.focus_handle(),
-        //});
-
-        content
+            space_logos: logos,
+        }
     }
 
     pub fn new_space(&mut self, cx: &mut Context<Self>, space_ctn: SpaceContent) {
+        if let Some(logo) = space_ctn.space.read(cx).name.chars().nth(0) {
+            self.space_logos.push(logo.to_string());
+        }
         self.spaces.push(space_ctn);
         self.current_space = self.spaces.len();
         cx.notify();
     }
 
-    pub fn with_space(&mut self, cx: &mut Context<Self>, space_ctn: SpaceContent) {
-        self.spaces.push(space_ctn);
+    pub fn with_space(&mut self, cx: &mut Context<Self>, space_ctns: Vec<SpaceContent>) {
+        for space_ctn in space_ctns.into_iter() {
+            if let Some(logo) = space_ctn.space.read(cx).name.chars().nth(0) {
+                self.space_logos.push(logo.to_string());
+            }
+            self.spaces.push(space_ctn);
+        }
+        self.current_space = 1;
         cx.notify();
     }
 
@@ -104,6 +115,10 @@ impl MainContent {
     pub fn current_sidebar(&self) -> Entity<SidebarView> {
         self.spaces[self.current_space - 1].sidebar.clone()
     }
+
+    pub fn retrive_logos(&self) -> Vec<String> {
+        self.space_logos.clone()
+    }
 }
 
 impl Focusable for MainContent {
@@ -115,6 +130,11 @@ impl Focusable for MainContent {
 impl Render for MainContent {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let current_sidebar = self.current_sidebar();
+        let space_logos = self.retrive_logos();
+        current_sidebar.update(cx, |sidebar, sb_cx| {
+            sidebar.register_logos(sb_cx, space_logos)
+        });
+
         let sidebar_fraction = current_sidebar.read(cx).visible_fraction();
 
         div()
@@ -161,8 +181,8 @@ impl Render for MainContent {
                     .on_mouse_move(cx.listener(|this, _: &gpui::MouseMoveEvent, _window, cx| {
                         this.current_sidebar()
                             .update(cx, |sidebar, cx| sidebar.set_floating_visible(false, cx));
-                    }))
-                    .child(div()),
+                    })),
             )
+            .child(div().flex_col().flex_col())
     }
 }

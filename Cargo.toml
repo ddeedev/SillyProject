@@ -8,6 +8,7 @@ members = [
   "crates/settings",
   "crates/context",
   "crates/ui",
+  "crates/action",
 ]
 
 [workspace.package]
@@ -16,6 +17,7 @@ edition = "2024"
 
 [workspace.dependencies]
 assets = { path = "crates/assets" }
+action = { path = "crates/action" }
 context = { path = "crates/context" }
 settings = { path = "crates/settings" }
 anyhow = "1.0.102"

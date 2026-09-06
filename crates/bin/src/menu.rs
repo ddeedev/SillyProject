@@ -1,4 +1,4 @@
-use crate::action::{Quit, ToggleSidebar};
+use action::action::{Quit, ToggleSidebar};
 use gpui::{App, Menu, MenuItem, SystemMenuType};
 
 pub fn init_app_menu(cx: &mut App) {
